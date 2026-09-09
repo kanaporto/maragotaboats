@@ -2,8 +2,9 @@
 
 import SearchForm from '@/components/SearchForm'
 import AvailabilityList from '@/components/AvailabilityList'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { PENDING_RESERVATION_KEY } from '@/components/StripePaymentForm'
 
 export interface SearchParams {
   province?: string
@@ -13,11 +14,63 @@ export interface SearchParams {
   userLocation?: { lat: number; lng: number }
 }
 
+interface ConfirmedReservation {
+  boatName: string
+  numPeople: number
+  fullName: string
+  email: string
+  amountEuros: number
+}
+
 export default function Home() {
   const [searchParams, setSearchParams] = useState<SearchParams | null>(null)
+  const [confirmedPayment, setConfirmedPayment] = useState<ConfirmedReservation | null>(null)
+
+  // Bizum (and other redirect-based methods) send the buyer back here after
+  // they approve the payment in their bank app. Stripe appends the outcome
+  // as query params, and we restore the reservation details we stashed
+  // before leaving.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const redirectStatus = params.get('redirect_status')
+
+    if (redirectStatus === 'succeeded') {
+      const saved = sessionStorage.getItem(PENDING_RESERVATION_KEY)
+      if (saved) {
+        setConfirmedPayment(JSON.parse(saved))
+        sessionStorage.removeItem(PENDING_RESERVATION_KEY)
+      }
+    }
+
+    if (redirectStatus) {
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-maragota-light-gray to-white relative">
+      {confirmedPayment && (
+        <div className="max-w-4xl mx-auto pt-8 px-4">
+          <div className="card text-center">
+            <div className="text-5xl mb-3">✓</div>
+            <h2 className="text-xl font-bold text-maragota-black mb-2">¡Reserva confirmada!</h2>
+            <p className="text-gray-600 mb-1">
+              {confirmedPayment.boatName} — {confirmedPayment.numPeople} persona
+              {confirmedPayment.numPeople > 1 ? 's' : ''}
+            </p>
+            <p className="text-gray-600 mb-4">
+              Pagado: <span className="font-semibold text-maragota-orange">{confirmedPayment.amountEuros}€</span>
+            </p>
+            <p className="text-sm text-gray-500">
+              Te hemos enviado la confirmación a {confirmedPayment.email}
+            </p>
+            <button onClick={() => setConfirmedPayment(null)} className="btn-secondary mt-6">
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Secret Admin Key */}
       <Link href="/franchisee" className="absolute top-20 right-4 text-4xl hover:scale-110 transition-transform opacity-0 hover:opacity-100" title="Panel franquiciado">
         🔑

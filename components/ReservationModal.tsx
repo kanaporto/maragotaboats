@@ -2,6 +2,9 @@
 
 import { useState } from 'react'
 import { SearchParams } from '@/app/page'
+import StripePaymentForm from './StripePaymentForm'
+
+const STRIPE_CONFIGURED = Boolean(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
 interface Boat {
   id: string
@@ -106,6 +109,15 @@ export default function ReservationModal({
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleStripeSuccess = () => {
+    // TODO: Integrar con Resend para enviar email (ver lib/emails.ts)
+    setStep('confirmation')
+  }
+
+  const handleStripeError = (message: string) => {
+    setError(message)
   }
 
   const reservationFee = 15
@@ -285,54 +297,67 @@ export default function ReservationModal({
                 Selecciona cómo quieres pagar <span className="font-bold text-maragota-orange">{formData.numPeople * reservationFee}€</span>
               </p>
 
-              <div className="space-y-3 mb-6">
-                <button
-                  onClick={() => handlePayment('applepay')}
-                  disabled={loading}
-                  className="w-full p-4 border-2 border-maragota-light-gray rounded-lg hover:border-maragota-orange transition-colors flex items-center justify-center gap-3 font-semibold disabled:opacity-50"
-                >
-                  <span className="text-2xl">🍎</span> Apple Pay
-                </button>
-
-                <button
-                  onClick={() => handlePayment('bizum')}
-                  disabled={loading}
-                  className="w-full p-4 border-2 border-maragota-light-gray rounded-lg hover:border-maragota-orange transition-colors flex items-center justify-center gap-3 font-semibold disabled:opacity-50"
-                >
-                  <span className="text-2xl">📱</span> Bizum
-                </button>
-
-                <button
-                  onClick={() => handlePayment('googlepay')}
-                  disabled={loading}
-                  className="w-full p-4 border-2 border-maragota-light-gray rounded-lg hover:border-maragota-orange transition-colors flex items-center justify-center gap-3 font-semibold disabled:opacity-50"
-                >
-                  <span className="text-2xl">🔵</span> Google Pay
-                </button>
-              </div>
-
               {error && (
                 <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
                   {error}
                 </div>
               )}
 
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setStep('details')}
-                  className="btn-secondary flex-1"
-                >
-                  Atrás
-                </button>
-                <button
-                  onClick={() => handlePayment('bizum')}
-                  disabled={loading}
-                  className="btn-primary flex-1"
-                >
-                  {loading ? 'Procesando...' : 'Pagar ahora'}
-                </button>
-              </div>
+              {STRIPE_CONFIGURED ? (
+                <div className="mb-6">
+                  <StripePaymentForm
+                    amountEuros={formData.numPeople * reservationFee}
+                    email={formData.email}
+                    boatName={boat.name}
+                    numPeople={formData.numPeople}
+                    fullName={formData.fullName}
+                    onSuccess={handleStripeSuccess}
+                    onError={handleStripeError}
+                  />
+                </div>
+              ) : (
+                <div className="space-y-3 mb-6">
+                  <button
+                    onClick={() => handlePayment('applepay')}
+                    disabled={loading}
+                    className="w-full p-4 border-2 border-maragota-light-gray rounded-lg hover:border-maragota-orange transition-colors flex items-center justify-center gap-3 font-semibold disabled:opacity-50"
+                  >
+                    <span className="text-2xl">🍎</span> Apple Pay
+                  </button>
+
+                  <button
+                    onClick={() => handlePayment('bizum')}
+                    disabled={loading}
+                    className="w-full p-4 border-2 border-maragota-light-gray rounded-lg hover:border-maragota-orange transition-colors flex items-center justify-center gap-3 font-semibold disabled:opacity-50"
+                  >
+                    <span className="text-2xl">📱</span> Bizum
+                  </button>
+
+                  <button
+                    onClick={() => handlePayment('googlepay')}
+                    disabled={loading}
+                    className="w-full p-4 border-2 border-maragota-light-gray rounded-lg hover:border-maragota-orange transition-colors flex items-center justify-center gap-3 font-semibold disabled:opacity-50"
+                  >
+                    <span className="text-2xl">🔵</span> Google Pay
+                  </button>
+
+                  <button
+                    onClick={() => handlePayment('bizum')}
+                    disabled={loading}
+                    className="btn-primary w-full"
+                  >
+                    {loading ? 'Procesando...' : 'Pagar ahora (simulado)'}
+                  </button>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setStep('details')}
+                className="btn-secondary w-full"
+              >
+                Atrás
+              </button>
             </div>
           )}
 
