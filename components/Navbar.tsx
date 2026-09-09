@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLocale } from '@/lib/i18n/context'
 import { LOCALE_FLAGS, LOCALE_NAMES, Locale } from '@/lib/i18n/translations'
 
-const LOCALES: Locale[] = ['es', 'en', 'fr']
+const LOCALES: Locale[] = ['es', 'gl', 'ca', 'eu', 'en', 'fr']
 
 function LanguageDropdown() {
   const { locale, setLocale } = useLocale()

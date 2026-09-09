@@ -8,7 +8,7 @@ import { COUNTRY_CODES } from '@/lib/countryCodes'
 
 const STRIPE_CONFIGURED = Boolean(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 const SITE_URL = 'https://maragota-boats.pages.dev'
-const DATE_LOCALES: Record<string, string> = { es: 'es-ES', en: 'en-GB', fr: 'fr-FR' }
+const DATE_LOCALES: Record<string, string> = { es: 'es-ES', gl: 'gl-ES', ca: 'ca-ES', eu: 'eu-ES', en: 'en-GB', fr: 'fr-FR' }
 
 interface Boat {
   id: string

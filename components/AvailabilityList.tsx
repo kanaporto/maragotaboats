@@ -7,7 +7,7 @@ import { getAllFranchisees, searchFranchisees } from '@/lib/dummyData'
 import { calculateDistance, getZoneByCity, FISHING_ZONES } from '@/lib/fishingZones'
 import { useLocale } from '@/lib/i18n/context'
 
-const DATE_LOCALES: Record<string, string> = { es: 'es-ES', en: 'en-GB', fr: 'fr-FR' }
+const DATE_LOCALES: Record<string, string> = { es: 'es-ES', gl: 'gl-ES', ca: 'ca-ES', eu: 'eu-ES', en: 'en-GB', fr: 'fr-FR' }
 
 interface BoatWithFranchisee {
   id: string
