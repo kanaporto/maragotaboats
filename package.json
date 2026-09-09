@@ -1,0 +1,35 @@
+{
+  "name": "maragota-boats",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx next dev",
+    "build": "npx next build",
+    "start": "npx next start",
+    "lint": "npx next lint"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "next": "^14.2.0",
+    "@supabase/supabase-js": "^2.38.0",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.31",
+    "autoprefixer": "^10.4.16",
+    "zustand": "^4.4.0",
+    "date-fns": "^2.30.0",
+    "react-hot-toast": "^2.4.1",
+    "resend": "^3.0.0",
+    "node-cron": "^3.0.0",
+    "bcryptjs": "^2.4.3",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.2.0",
+    "@types/node": "^20.5.0",
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7",
+    "eslint": "^8.48.0",
+    "eslint-config-next": "^14.0.0"
+  }
+}
