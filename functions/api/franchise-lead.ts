@@ -1,15 +1,16 @@
 // Cloudflare Pages Function — receives "become a franchisee" inquiries.
 // Franchisee accounts are still created by hand (see lib/dummyData.ts /
-// AUTHORIZED_FRANCHISEES), so this just notifies the team by email instead
-// of self-registering anyone.
+// AUTHORIZED_FRANCHISEES), so this stores the lead in KV for Geno to work
+// the pipeline from the admin panel, and best-effort emails a notification.
 // Endpoint: POST /api/franchise-lead
 
 interface Env {
+  LEADS_KV: KVNamespace
   RESEND_API_KEY: string
   FRANCHISE_NOTIFICATION_EMAIL: string
 }
 
-interface FranchiseLeadBody {
+interface FranchiseLeadInput {
   fullName: string
   city: string
   province: string
@@ -20,7 +21,7 @@ interface FranchiseLeadBody {
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
-  let body: FranchiseLeadBody
+  let body: FranchiseLeadInput
   try {
     body = await context.request.json()
   } catch {
@@ -39,8 +40,33 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     })
   }
 
-  // Sin RESEND_API_KEY configurada seguimos aceptando la solicitud (no
-  // bloqueamos al usuario) pero no se envía ningún email todavía.
+  const now = new Date().toISOString()
+  const id = crypto.randomUUID()
+
+  const lead = {
+    id,
+    fullName,
+    city,
+    province,
+    phone,
+    email,
+    experience: experience || '',
+    message: message || '',
+    createdAt: now,
+    updatedAt: now,
+    status: 'nuevo',
+    primerContacto: false,
+    primerContactoFecha: '',
+    negociacionCompleta: 'pendiente',
+    notas: '',
+    tiempoEstimado: '',
+    documentosFirmados: false,
+    barcoOfrecido: false,
+    tiempoImplementacion: '',
+  }
+
+  await context.env.LEADS_KV.put(`lead:${id}`, JSON.stringify(lead))
+
   if (context.env.RESEND_API_KEY) {
     const notifyTo = context.env.FRANCHISE_NOTIFICATION_EMAIL || 'geno@maragota.com'
 
@@ -64,6 +90,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           <p><strong>Experiencia:</strong> ${experience || '(no especificada)'}</p>
           <p><strong>Mensaje:</strong></p>
           <p>${(message || '(sin mensaje)').replace(/\n/g, '<br/>')}</p>
+          <p>Gestiona esta solicitud desde el panel admin, pestaña Solicitudes.</p>
         `,
       }),
     }).catch(() => {
@@ -71,7 +98,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     })
   }
 
-  return new Response(JSON.stringify({ success: true }), {
+  return new Response(JSON.stringify({ success: true, id }), {
     headers: { 'Content-Type': 'application/json' },
   })
 }
