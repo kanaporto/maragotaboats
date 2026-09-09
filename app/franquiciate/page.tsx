@@ -55,9 +55,9 @@ const BENEFITS = [
     description: 'Marca los días y plazas que quieres ofrecer. El control de tu actividad sigue siendo tuyo.',
   },
   {
-    icon: '🎣',
-    title: 'Sin cuota de entrada',
-    description: 'El alta como franquiciado no tiene coste inicial. Hablamos de las condiciones caso por caso.',
+    icon: '🚤',
+    title: 'Te damos el barco',
+    description: 'La franquicia incluye un barco Poly Made diseñado para pesca. Tú solo tienes que salir a pescar.',
   },
 ]
 

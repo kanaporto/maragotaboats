@@ -2,6 +2,7 @@
 
 import { getAllFranchisees } from '@/lib/dummyData'
 import { getZoneByCity } from '@/lib/fishingZones'
+import { useLocale } from '@/lib/i18n/context'
 
 const RESERVATION_FEE = 15
 const FRANCHISEE_FEE = 45
@@ -11,16 +12,17 @@ interface FeaturedFranchisesProps {
 }
 
 export default function FeaturedFranchises({ onSelectProvince }: FeaturedFranchisesProps) {
+  const { t } = useLocale()
   const franchisees = getAllFranchisees()
 
   return (
     <section className="py-12 px-4 bg-maragota-light-gray">
       <div className="max-w-5xl mx-auto">
         <h2 className="text-3xl font-bold text-maragota-black text-center mb-2">
-          Nuestras franquicias
+          {t.featured.title}
         </h2>
         <p className="text-gray-600 text-center mb-10">
-          Cada localidad tiene su propia pesca y sus propios caladeros
+          {t.featured.subtitle}
         </p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -60,9 +62,9 @@ export default function FeaturedFranchises({ onSelectProvince }: FeaturedFranchi
                 )}
 
                 <div className="flex items-center justify-between pt-3 border-t text-sm">
-                  <span className="text-gray-600">{franchisee.boats.length} barco{franchisee.boats.length !== 1 ? 's' : ''}</span>
+                  <span className="text-gray-600">{t.featured.boatsLabel(franchisee.boats.length)}</span>
                   <span className="font-semibold text-maragota-orange">
-                    Desde {RESERVATION_FEE + FRANCHISEE_FEE}€ / persona
+                    {t.featured.fromPrice(RESERVATION_FEE + FRANCHISEE_FEE)}
                   </span>
                 </div>
               </button>

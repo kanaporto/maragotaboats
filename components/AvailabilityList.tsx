@@ -5,6 +5,9 @@ import { useState } from 'react'
 import ReservationModal from './ReservationModal'
 import { getAllFranchisees, searchFranchisees } from '@/lib/dummyData'
 import { calculateDistance, getZoneByCity, FISHING_ZONES } from '@/lib/fishingZones'
+import { useLocale } from '@/lib/i18n/context'
+
+const DATE_LOCALES: Record<string, string> = { es: 'es-ES', en: 'en-GB', fr: 'fr-FR' }
 
 interface BoatWithFranchisee {
   id: string
@@ -26,6 +29,7 @@ interface AvailabilityListProps {
 }
 
 export default function AvailabilityList({ searchParams }: AvailabilityListProps) {
+  const { t, locale } = useLocale()
   const [selectedBoat, setSelectedBoat] = useState<BoatWithFranchisee | null>(null)
   const [showReservationModal, setShowReservationModal] = useState(false)
 
@@ -88,22 +92,22 @@ export default function AvailabilityList({ searchParams }: AvailabilityListProps
   return (
     <>
       <div className="mb-8">
-        <h2 className="text-2xl font-bold text-maragota-black mb-4">Disponibilidad</h2>
+        <h2 className="text-2xl font-bold text-maragota-black mb-4">{t.availability.title}</h2>
         <div className="text-sm text-gray-600 mb-6 p-4 bg-maragota-light-gray rounded-lg">
           {searchParams.nearMe ? (
-            <p>📍 Mostrando salidas más cercanas a ti</p>
+            <p>{t.availability.nearMeLabel}</p>
           ) : (
-            <p>📍 Provincia: {searchParams.province || 'Todas'}</p>
+            <p>{t.availability.provinceLabel(searchParams.province || t.availability.allProvinces)}</p>
           )}
-          {searchParams.date && <p>📅 Fecha: {new Date(searchParams.date).toLocaleDateString('es-ES')}</p>}
-          {searchParams.time && <p>⏰ Hora: {searchParams.time}</p>}
+          {searchParams.date && <p>{t.availability.dateLabel(new Date(searchParams.date).toLocaleDateString(DATE_LOCALES[locale]))}</p>}
+          {searchParams.time && <p>{t.availability.timeLabel(searchParams.time)}</p>}
         </div>
       </div>
 
       {boats.length === 0 ? (
         <div className="card text-center py-12">
-          <p className="text-gray-600 mb-4">No hay salidas disponibles para los criterios seleccionados.</p>
-          <p className="text-sm text-gray-500">Intenta cambiar la fecha, hora o provincia.</p>
+          <p className="text-gray-600 mb-4">{t.availability.noResultsTitle}</p>
+          <p className="text-sm text-gray-500">{t.availability.noResultsHint}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">
@@ -120,7 +124,7 @@ export default function AvailabilityList({ searchParams }: AvailabilityListProps
                     {boat.distance !== undefined && (
                       <div className="text-right bg-maragota-light-gray px-3 py-2 rounded">
                         <p className="text-sm font-bold text-maragota-orange">{boat.distance} km</p>
-                        <p className="text-xs text-gray-600">de distancia</p>
+                        <p className="text-xs text-gray-600">{t.availability.distanceLabel}</p>
                       </div>
                     )}
                   </div>
@@ -129,7 +133,7 @@ export default function AvailabilityList({ searchParams }: AvailabilityListProps
                   {/* Pesca local */}
                   {boat.localFish && boat.localFish.length > 0 && (
                     <div className="mb-4 p-3 bg-blue-50 border-l-4 border-blue-400 rounded">
-                      <p className="text-xs font-semibold text-blue-900 mb-2">🎣 Pesca local:</p>
+                      <p className="text-xs font-semibold text-blue-900 mb-2">{t.availability.localFishLabel}</p>
                       <div className="flex flex-wrap gap-2">
                         {boat.localFish.map((fish) => (
                           <span
@@ -147,26 +151,23 @@ export default function AvailabilityList({ searchParams }: AvailabilityListProps
                     <div className="flex items-center gap-1">
                       <span className="text-yellow-400">★</span>
                       <span className="font-semibold">{boat.rating}</span>
-                      <span className="text-gray-500 text-sm">({boat.reviews} opiniones)</span>
+                      <span className="text-gray-500 text-sm">{t.availability.reviewsLabel(boat.reviews)}</span>
                     </div>
                   </div>
 
                   {/* Qué incluye */}
                   <div className="mb-4 p-3 bg-green-50 border-l-4 border-green-400 rounded">
-                    <p className="text-xs font-semibold text-green-900 mb-2">✓ Tu salida incluye:</p>
+                    <p className="text-xs font-semibold text-green-900 mb-2">{t.availability.includesTitle}</p>
                     <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-green-900">
-                      <span>Equipo de pesca y cebo</span>
-                      <span>Seguro y licencia colectiva</span>
-                      <span>Chaleco salvavidas</span>
-                      <span>Monitor guía a bordo</span>
-                      <span>GPS / sonda de pesca</span>
-                      <span>Combustible incluido</span>
+                      {t.availability.includesItems.map((item) => (
+                        <span key={item}>{item}</span>
+                      ))}
                     </div>
                   </div>
 
                   {/* Seats info */}
                   <div className="mb-4">
-                    <p className="text-sm text-gray-600 mb-2">Sitios disponibles: {boat.availableSeats}/{boat.totalSeats}</p>
+                    <p className="text-sm text-gray-600 mb-2">{t.availability.seatsLabel(boat.availableSeats, boat.totalSeats)}</p>
                     <div className="flex gap-1">
                       {Array.from({ length: boat.totalSeats }).map((_, i) => (
                         <div
@@ -185,7 +186,7 @@ export default function AvailabilityList({ searchParams }: AvailabilityListProps
 
                   {boat.availableSeats === 0 && (
                     <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-2 rounded-lg text-sm">
-                      Barco completo para esta fecha
+                      {t.availability.fullBadge}
                     </div>
                   )}
                 </div>
@@ -194,21 +195,21 @@ export default function AvailabilityList({ searchParams }: AvailabilityListProps
                 <div className="flex flex-col justify-between">
                   <div>
                     <div className="mb-6">
-                      <div className="text-sm text-gray-600 mb-2">Desglose de precio</div>
+                      <div className="text-sm text-gray-600 mb-2">{t.availability.priceBreakdownTitle}</div>
                       <div className="space-y-1 text-sm mb-4 pb-4 border-b">
                         <div className="flex justify-between">
-                          <span>Reserva (ahora):</span>
+                          <span>{t.availability.reservationNow}</span>
                           <span className="font-semibold">15€</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Franquiciado (después):</span>
+                          <span>{t.availability.franchiseeLater}</span>
                           <span className="font-semibold">45€</span>
                         </div>
                       </div>
                       <div className="text-lg font-bold text-maragota-orange">
-                        Total: <span className="text-2xl">60€</span>
+                        {t.availability.totalLabel} <span className="text-2xl">60€</span>
                       </div>
-                      <p className="text-xs text-gray-500 mt-2">Por persona</p>
+                      <p className="text-xs text-gray-500 mt-2">{t.availability.perPerson}</p>
                     </div>
                   </div>
 
@@ -217,7 +218,7 @@ export default function AvailabilityList({ searchParams }: AvailabilityListProps
                     disabled={boat.availableSeats === 0}
                     className={boat.availableSeats === 0 ? 'btn-secondary opacity-50 cursor-not-allowed' : 'btn-primary w-full'}
                   >
-                    {boat.availableSeats === 0 ? 'Sin disponibilidad' : 'Reservar ahora'}
+                    {boat.availableSeats === 0 ? t.availability.noAvailabilityButton : t.availability.reserveButton}
                   </button>
                 </div>
               </div>

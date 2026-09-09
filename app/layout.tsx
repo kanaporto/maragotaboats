@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import DevGate from '@/components/DevGate'
 import BrevoChat from '@/components/BrevoChat'
+import { LocaleProvider } from '@/lib/i18n/context'
 
 export const metadata: Metadata = {
   title: 'Maragota Boats - Reservas de Pesca',
@@ -18,14 +19,16 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="bg-maragota-white">
-        <DevGate>
-          <Navbar />
-          <main>
-            {children}
-          </main>
-          <Footer />
-          <BrevoChat />
-        </DevGate>
+        <LocaleProvider>
+          <DevGate>
+            <Navbar />
+            <main>
+              {children}
+            </main>
+            <Footer />
+            <BrevoChat />
+          </DevGate>
+        </LocaleProvider>
       </body>
     </html>
   )

@@ -7,6 +7,7 @@ import WhyChooseUs from '@/components/WhyChooseUs'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { PENDING_RESERVATION_KEY } from '@/components/StripePaymentForm'
+import { useLocale } from '@/lib/i18n/context'
 
 export interface SearchParams {
   province?: string
@@ -25,6 +26,7 @@ interface ConfirmedReservation {
 }
 
 export default function Home() {
+  const { t } = useLocale()
   const [searchParams, setSearchParams] = useState<SearchParams | null>(null)
   const [confirmedPayment, setConfirmedPayment] = useState<ConfirmedReservation | null>(null)
 
@@ -67,19 +69,18 @@ export default function Home() {
         <div className="max-w-4xl mx-auto pt-8 px-4">
           <div className="card text-center">
             <div className="text-5xl mb-3">✓</div>
-            <h2 className="text-xl font-bold text-maragota-black mb-2">¡Reserva confirmada!</h2>
+            <h2 className="text-xl font-bold text-maragota-black mb-2">{t.home.paymentConfirmedTitle}</h2>
             <p className="text-gray-600 mb-1">
-              {confirmedPayment.boatName} — {confirmedPayment.numPeople} persona
-              {confirmedPayment.numPeople > 1 ? 's' : ''}
+              {confirmedPayment.boatName} — {t.reservationModal.personOption(confirmedPayment.numPeople)}
             </p>
             <p className="text-gray-600 mb-4">
-              Pagado: <span className="font-semibold text-maragota-orange">{confirmedPayment.amountEuros}€</span>
+              {t.home.paidLabel} <span className="font-semibold text-maragota-orange">{confirmedPayment.amountEuros}€</span>
             </p>
             <p className="text-sm text-gray-500">
-              Te hemos enviado la confirmación a {confirmedPayment.email}
+              {t.home.confirmationSentTo} {confirmedPayment.email}
             </p>
             <button onClick={() => setConfirmedPayment(null)} className="btn-secondary mt-6">
-              Cerrar
+              {t.home.closeButton}
             </button>
           </div>
         </div>
@@ -93,9 +94,9 @@ export default function Home() {
       {/* Hero Section */}
       <section className="bg-maragota-black text-white py-16 px-4">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-4">Maragota Boats</h1>
-          <p className="text-xl text-gray-300 mb-2">Vive la experiencia de pesca más auténtica de España</p>
-          <p className="text-gray-400">Reserva tu salida con los mejores pescadores locales</p>
+          <h1 className="text-5xl font-bold mb-4">{t.home.heroTitle}</h1>
+          <p className="text-xl text-gray-300 mb-2">{t.home.heroSubtitle1}</p>
+          <p className="text-gray-400">{t.home.heroSubtitle2}</p>
         </div>
       </section>
 
@@ -124,22 +125,22 @@ export default function Home() {
           <section className="py-12 px-4">
             <div className="max-w-4xl mx-auto text-center">
               <div className="card">
-                <h2 className="text-2xl font-bold text-maragota-black mb-4">¿Cómo funciona?</h2>
+                <h2 className="text-2xl font-bold text-maragota-black mb-4">{t.home.howItWorksTitle}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
                   <div>
                     <div className="text-4xl text-maragota-orange mb-4">🔍</div>
-                    <h3 className="font-bold mb-2">1. Busca</h3>
-                    <p className="text-gray-600">Encuentra la salida perfecta cerca de ti</p>
+                    <h3 className="font-bold mb-2">{t.home.step1Title}</h3>
+                    <p className="text-gray-600">{t.home.step1Desc}</p>
                   </div>
                   <div>
                     <div className="text-4xl text-maragota-orange mb-4">📅</div>
-                    <h3 className="font-bold mb-2">2. Selecciona</h3>
-                    <p className="text-gray-600">Elige la fecha, hora y número de personas</p>
+                    <h3 className="font-bold mb-2">{t.home.step2Title}</h3>
+                    <p className="text-gray-600">{t.home.step2Desc}</p>
                   </div>
                   <div>
                     <div className="text-4xl text-maragota-orange mb-4">🎣</div>
-                    <h3 className="font-bold mb-2">3. Reserva</h3>
-                    <p className="text-gray-600">Confirma tu reserva y ¡a pescar!</p>
+                    <h3 className="font-bold mb-2">{t.home.step3Title}</h3>
+                    <p className="text-gray-600">{t.home.step3Desc}</p>
                   </div>
                 </div>
               </div>

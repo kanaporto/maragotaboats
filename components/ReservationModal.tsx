@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { SearchParams } from '@/app/page'
 import StripePaymentForm from './StripePaymentForm'
+import { useLocale } from '@/lib/i18n/context'
 
 const STRIPE_CONFIGURED = Boolean(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
@@ -27,6 +28,7 @@ export default function ReservationModal({
   isOpen,
   onClose,
 }: ReservationModalProps) {
+  const { t } = useLocale()
   const [step, setStep] = useState<'people' | 'details' | 'payment' | 'confirmation'>('people')
   const [formData, setFormData] = useState({
     numPeople: 1,
@@ -58,19 +60,19 @@ export default function ReservationModal({
     setError('')
 
     if (!formData.fullName.trim()) {
-      setError('El nombre completo es obligatorio')
+      setError(t.reservationModal.errorFullNameRequired)
       return
     }
     if (!formData.email.trim() || !formData.email.includes('@')) {
-      setError('Por favor ingresa un email válido')
+      setError(t.reservationModal.errorEmailInvalid)
       return
     }
     if (formData.email !== formData.confirmEmail) {
-      setError('Los emails no coinciden')
+      setError(t.reservationModal.errorEmailMismatch)
       return
     }
     if (!formData.phone.trim() || formData.phone.length < 9) {
-      setError('Por favor ingresa un teléfono válido')
+      setError(t.reservationModal.errorPhoneInvalid)
       return
     }
 
@@ -105,7 +107,7 @@ export default function ReservationModal({
 
       setStep('confirmation')
     } catch (err) {
-      setError('Error procesando el pago. Intenta de nuevo.')
+      setError(t.reservationModal.errorPaymentGeneric)
     } finally {
       setLoading(false)
     }
@@ -133,7 +135,7 @@ export default function ReservationModal({
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-2xl font-bold">{boat.name}</h2>
-              <p className="text-gray-300 text-sm mt-1">Completa tu reserva en 3 pasos</p>
+              <p className="text-gray-300 text-sm mt-1">{t.reservationModal.completeIn3Steps}</p>
             </div>
             <button
               onClick={onClose}
@@ -156,11 +158,11 @@ export default function ReservationModal({
           {/* Step 1: Number of People */}
           {step === 'people' && (
             <form onSubmit={handlePeopleSubmit}>
-              <h3 className="text-lg font-bold text-maragota-black mb-6">¿Cuántas personas?</h3>
+              <h3 className="text-lg font-bold text-maragota-black mb-6">{t.reservationModal.peopleTitle}</h3>
 
               <div className="mb-8">
                 <label className="block text-sm font-semibold text-maragota-black mb-4">
-                  Número de personas (máximo {boat.availableSeats})
+                  {t.reservationModal.peopleLabel(boat.availableSeats)}
                 </label>
                 <select
                   name="numPeople"
@@ -170,7 +172,7 @@ export default function ReservationModal({
                 >
                   {Array.from({ length: boat.availableSeats }).map((_, i) => (
                     <option key={i + 1} value={i + 1}>
-                      {i + 1} persona{i + 1 > 1 ? 's' : ''}
+                      {t.reservationModal.personOption(i + 1)}
                     </option>
                   ))}
                 </select>
@@ -178,16 +180,16 @@ export default function ReservationModal({
 
               {/* Price preview */}
               <div className="bg-maragota-light-gray p-4 rounded-lg mb-6">
-                <div className="text-sm text-gray-600 mb-4">Precio total para {formData.numPeople} persona{formData.numPeople > 1 ? 's' : ''}:</div>
+                <div className="text-sm text-gray-600 mb-4">{t.reservationModal.priceForPeople(formData.numPeople)}</div>
                 <div className="text-3xl font-bold text-maragota-orange">{formData.numPeople * 60}€</div>
                 <div className="text-xs text-gray-500 mt-2">
-                  • Reserva ahora: {formData.numPeople * reservationFee}€<br/>
-                  • Paga en destino: {formData.numPeople * franchiseeFee}€
+                  • {t.reservationModal.reserveNowLine(formData.numPeople * reservationFee)}<br/>
+                  • {t.reservationModal.payAtDestinationLine(formData.numPeople * franchiseeFee)}
                 </div>
               </div>
 
               <button type="submit" className="btn-primary w-full">
-                Continuar
+                {t.reservationModal.continueButton}
               </button>
             </form>
           )}
@@ -195,12 +197,12 @@ export default function ReservationModal({
           {/* Step 2: Personal Details */}
           {step === 'details' && (
             <form onSubmit={handleDetailsSubmit}>
-              <h3 className="text-lg font-bold text-maragota-black mb-6">Tus datos personales</h3>
+              <h3 className="text-lg font-bold text-maragota-black mb-6">{t.reservationModal.detailsTitle}</h3>
 
               <div className="space-y-4 mb-6">
                 <div>
                   <label className="block text-sm font-semibold text-maragota-black mb-2">
-                    Nombre completo *
+                    {t.reservationModal.fullNameLabel}
                   </label>
                   <input
                     type="text"
@@ -214,7 +216,7 @@ export default function ReservationModal({
 
                 <div>
                   <label className="block text-sm font-semibold text-maragota-black mb-2">
-                    Email *
+                    {t.reservationModal.emailLabel}
                   </label>
                   <input
                     type="email"
@@ -224,12 +226,12 @@ export default function ReservationModal({
                     placeholder="tu@email.com"
                     className="input-field"
                   />
-                  <p className="text-xs text-gray-500 mt-1">Recibirás la confirmación en este email</p>
+                  <p className="text-xs text-gray-500 mt-1">{t.reservationModal.emailHint}</p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-semibold text-maragota-black mb-2">
-                    Confirmar email *
+                    {t.reservationModal.confirmEmailLabel}
                   </label>
                   <input
                     type="email"
@@ -243,7 +245,7 @@ export default function ReservationModal({
 
                 <div>
                   <label className="block text-sm font-semibold text-maragota-black mb-2">
-                    Teléfono *
+                    {t.reservationModal.phoneLabel}
                   </label>
                   <input
                     type="tel"
@@ -265,19 +267,19 @@ export default function ReservationModal({
               {/* Price summary */}
               <div className="bg-maragota-light-gray p-4 rounded-lg mb-6">
                 <div className="flex justify-between mb-2">
-                  <span>Reserva ({formData.numPeople} x {reservationFee}€):</span>
+                  <span>{t.reservationModal.reservationLine(formData.numPeople, reservationFee)}</span>
                   <span className="font-semibold">{formData.numPeople * reservationFee}€</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
-                  <span>A pagar en destino:</span>
+                  <span>{t.availability.franchiseeLater}</span>
                   <span>{formData.numPeople * franchiseeFee}€</span>
                 </div>
               </div>
 
               <p className="text-xs text-gray-500 mb-6">
-                Si no te presentas a la salida, la reserva no se reembolsa. Consulta las{' '}
+                {t.reservationModal.noShowDisclaimer}{' '}
                 <a href="/legal/terminos" target="_blank" rel="noopener noreferrer" className="text-maragota-orange hover:underline">
-                  condiciones de reserva
+                  {t.reservationModal.termsLink}
                 </a>.
               </p>
 
@@ -287,10 +289,10 @@ export default function ReservationModal({
                   onClick={() => setStep('people')}
                   className="btn-secondary flex-1"
                 >
-                  Atrás
+                  {t.reservationModal.backButton}
                 </button>
                 <button type="submit" className="btn-primary flex-1">
-                  Continuar al pago
+                  {t.reservationModal.continueToPayment}
                 </button>
               </div>
             </form>
@@ -299,9 +301,9 @@ export default function ReservationModal({
           {/* Step 3: Payment */}
           {step === 'payment' && (
             <div>
-              <h3 className="text-lg font-bold text-maragota-black mb-4">Método de pago</h3>
+              <h3 className="text-lg font-bold text-maragota-black mb-4">{t.reservationModal.paymentTitle}</h3>
               <p className="text-gray-600 mb-6">
-                Selecciona cómo quieres pagar <span className="font-bold text-maragota-orange">{formData.numPeople * reservationFee}€</span>
+                {t.reservationModal.selectPaymentMethod(formData.numPeople * reservationFee)}
               </p>
 
               {error && (
@@ -329,7 +331,7 @@ export default function ReservationModal({
                     disabled={loading}
                     className="w-full p-4 border-2 border-maragota-light-gray rounded-lg hover:border-maragota-orange transition-colors flex items-center justify-center gap-3 font-semibold disabled:opacity-50"
                   >
-                    <span className="text-2xl">🍎</span> Apple Pay
+                    <span className="text-2xl">🍎</span> {t.reservationModal.applePay}
                   </button>
 
                   <button
@@ -337,7 +339,7 @@ export default function ReservationModal({
                     disabled={loading}
                     className="w-full p-4 border-2 border-maragota-light-gray rounded-lg hover:border-maragota-orange transition-colors flex items-center justify-center gap-3 font-semibold disabled:opacity-50"
                   >
-                    <span className="text-2xl">📱</span> Bizum
+                    <span className="text-2xl">📱</span> {t.reservationModal.bizum}
                   </button>
 
                   <button
@@ -345,7 +347,7 @@ export default function ReservationModal({
                     disabled={loading}
                     className="w-full p-4 border-2 border-maragota-light-gray rounded-lg hover:border-maragota-orange transition-colors flex items-center justify-center gap-3 font-semibold disabled:opacity-50"
                   >
-                    <span className="text-2xl">🔵</span> Google Pay
+                    <span className="text-2xl">🔵</span> {t.reservationModal.googlePay}
                   </button>
 
                   <button
@@ -353,7 +355,7 @@ export default function ReservationModal({
                     disabled={loading}
                     className="btn-primary w-full"
                   >
-                    {loading ? 'Procesando...' : 'Pagar ahora (simulado)'}
+                    {loading ? t.reservationModal.processing : t.reservationModal.payNowSimulated}
                   </button>
                 </div>
               )}
@@ -363,7 +365,7 @@ export default function ReservationModal({
                 onClick={() => setStep('details')}
                 className="btn-secondary w-full"
               >
-                Atrás
+                {t.reservationModal.backButton}
               </button>
             </div>
           )}
@@ -372,41 +374,41 @@ export default function ReservationModal({
           {step === 'confirmation' && (
             <div className="text-center">
               <div className="text-6xl mb-4">✓</div>
-              <h3 className="text-2xl font-bold text-maragota-black mb-2">¡Reserva confirmada!</h3>
-              <p className="text-gray-600 mb-6">Te hemos enviado un email con todos los detalles de tu reserva</p>
+              <h3 className="text-2xl font-bold text-maragota-black mb-2">{t.reservationModal.confirmationTitle}</h3>
+              <p className="text-gray-600 mb-6">{t.reservationModal.confirmationSubtitle}</p>
 
               <div className="bg-maragota-light-gray p-6 rounded-lg mb-6 text-left">
-                <p className="text-sm text-gray-600 mb-2">Confirmación enviada a:</p>
+                <p className="text-sm text-gray-600 mb-2">{t.reservationModal.confirmationSentTo}</p>
                 <p className="font-semibold text-maragota-black mb-6">{formData.email}</p>
 
                 <div className="space-y-3 text-sm border-t pt-4">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Barco:</span>
+                    <span className="text-gray-600">{t.reservationModal.boatLabel}</span>
                     <span className="font-semibold">{boat.name}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Personas:</span>
+                    <span className="text-gray-600">{t.reservationModal.peopleLabelShort}</span>
                     <span className="font-semibold">{formData.numPeople}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Pagado hoy:</span>
+                    <span className="text-gray-600">{t.reservationModal.paidTodayLabel}</span>
                     <span className="font-semibold text-maragota-orange">{formData.numPeople * reservationFee}€</span>
                   </div>
                 </div>
               </div>
 
               <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6 text-left text-sm">
-                <p className="font-semibold text-blue-900 mb-2">📌 Próximos pasos:</p>
+                <p className="font-semibold text-blue-900 mb-2">{t.reservationModal.nextStepsTitle}</p>
                 <ul className="text-blue-800 space-y-1">
-                  <li>✓ Revisamos tu email</li>
-                  <li>• El franquiciado te contactará en 24h</li>
-                  <li>• Paga {formData.numPeople * franchiseeFee}€ al llegar (efectivo o tarjeta)</li>
-                  <li>• ¡A disfrutar de la pesca!</li>
+                  <li>{t.reservationModal.nextStepsCheckEmail}</li>
+                  <li>{t.reservationModal.nextStepsContact}</li>
+                  <li>{t.reservationModal.nextStepsPay(formData.numPeople * franchiseeFee)}</li>
+                  <li>{t.reservationModal.nextStepsEnjoy}</li>
                 </ul>
               </div>
 
               <button onClick={onClose} className="btn-primary w-full">
-                Volver al inicio
+                {t.reservationModal.backHomeButton}
               </button>
             </div>
           )}

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { SearchParams } from '@/app/page'
 import { getCoordinatesFromPostalCode } from '@/lib/fishingZones'
+import { useLocale } from '@/lib/i18n/context'
 
 const SPANISH_PROVINCES = [
   'Álava', 'Albacete', 'Alicante', 'Almería', 'Asturias', 'Ávila',
@@ -21,6 +22,7 @@ interface SearchFormProps {
 }
 
 export default function SearchForm({ onSearch }: SearchFormProps) {
+  const { t } = useLocale()
   const [searchType, setSearchType] = useState<'province' | 'nearme' | 'postal'>('province')
   const [province, setProvince] = useState('')
   const [postalCode, setPostalCode] = useState('')
@@ -48,13 +50,13 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
           setLoading(false)
         },
         (err) => {
-          setError('No se pudo obtener tu ubicación. Intenta buscando por código postal.')
+          setError(t.search.errorGeoFailed)
           setLoading(false)
           console.error(err)
         }
       )
     } else {
-      setError('Tu navegador no soporta geolocalización.')
+      setError(t.search.errorGeoUnsupported)
       setLoading(false)
     }
   }
@@ -73,10 +75,10 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
           time,
         })
       } else {
-        setError('Código postal no encontrado. Intenta con otro.')
+        setError(t.search.errorPostalNotFound)
       }
     } catch (err) {
-      setError('Error al buscar por código postal.')
+      setError(t.search.errorPostalGeneric)
     } finally {
       setLoading(false)
     }
@@ -88,7 +90,7 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
 
     if (searchType === 'province') {
       if (!province) {
-        setError('Por favor selecciona una provincia')
+        setError(t.search.errorSelectProvince)
         return
       }
       onSearch({
@@ -100,7 +102,7 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
       handleNearMe()
     } else if (searchType === 'postal') {
       if (!postalCode.trim()) {
-        setError('Por favor ingresa un código postal')
+        setError(t.search.errorEnterPostal)
         return
       }
       handlePostalCodeSearch()
@@ -120,8 +122,8 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
 
   return (
     <form onSubmit={handleSearch} className="card">
-      <h2 className="text-3xl font-bold text-maragota-black mb-2">¿Dónde vamos a pescar hoy?</h2>
-      <p className="text-gray-600 mb-6">Encuentra la mejor experiencia de pesca cerca de ti</p>
+      <h2 className="text-3xl font-bold text-maragota-black mb-2">{t.search.title}</h2>
+      <p className="text-gray-600 mb-6">{t.search.subtitle}</p>
 
       {/* Tipo de búsqueda */}
       <div className="grid grid-cols-3 gap-2 mb-6">
@@ -134,7 +136,7 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
-          📍 Provincia
+          {t.search.tabProvince}
         </button>
         <button
           type="button"
@@ -145,7 +147,7 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
-          🔍 Código Postal
+          {t.search.tabPostal}
         </button>
         <button
           type="button"
@@ -156,7 +158,7 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
-          📌 Cerca de mí
+          {t.search.tabNearMe}
         </button>
       </div>
 
@@ -165,14 +167,14 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label className="block text-sm font-semibold text-maragota-black mb-2">
-              Selecciona una provincia
+              {t.search.provinceLabel}
             </label>
             <select
               value={province}
               onChange={(e) => setProvince(e.target.value)}
               className="input-field"
             >
-              <option value="">Elige tu provincia</option>
+              <option value="">{t.search.provincePlaceholder}</option>
               {SPANISH_PROVINCES.map((prov) => (
                 <option key={prov} value={prov}>
                   {prov}
@@ -181,7 +183,7 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
             </select>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-maragota-black mb-2">Fecha</label>
+            <label className="block text-sm font-semibold text-maragota-black mb-2">{t.search.dateLabel}</label>
             <input
               type="date"
               value={date}
@@ -199,19 +201,19 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label className="block text-sm font-semibold text-maragota-black mb-2">
-              Código postal o población
+              {t.search.postalLabel}
             </label>
             <input
               type="text"
               value={postalCode}
               onChange={(e) => setPostalCode(e.target.value)}
-              placeholder="Ej: 36960 o Marín"
+              placeholder={t.search.postalPlaceholder}
               className="input-field"
             />
-            <p className="text-xs text-gray-500 mt-1">Te mostrará los más cercanos</p>
+            <p className="text-xs text-gray-500 mt-1">{t.search.postalHint}</p>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-maragota-black mb-2">Fecha</label>
+            <label className="block text-sm font-semibold text-maragota-black mb-2">{t.search.dateLabel}</label>
             <input
               type="date"
               value={date}
@@ -229,16 +231,16 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div>
             <label className="block text-sm font-semibold text-maragota-black mb-2">
-              Tu ubicación actual
+              {t.search.nearMeLabel}
             </label>
             <div className="bg-blue-50 border border-blue-300 p-4 rounded-lg">
               <p className="text-sm text-blue-900">
-                📍 Usaremos tu ubicación actual para encontrar las zonas más cercanas
+                {t.search.nearMeHint}
               </p>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-maragota-black mb-2">Fecha</label>
+            <label className="block text-sm font-semibold text-maragota-black mb-2">{t.search.dateLabel}</label>
             <input
               type="date"
               value={date}
@@ -254,19 +256,17 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
       {/* Hora */}
       <div className="mb-6">
         <label className="block text-sm font-semibold text-maragota-black mb-2">
-          Hora de salida (opcional)
+          {t.search.timeLabel}
         </label>
         <select
           value={time}
           onChange={(e) => setTime(e.target.value)}
           className="input-field"
         >
-          <option value="">Cualquier hora</option>
-          <option value="06:00">🌅 06:00 - Madrugada</option>
-          <option value="08:00">🌄 08:00 - Mañana</option>
-          <option value="10:00">☀️ 10:00 - Mediamañana</option>
-          <option value="13:00">🌞 13:00 - Tarde</option>
-          <option value="16:00">🌅 16:00 - Atardecer</option>
+          <option value="">{t.search.timeAny}</option>
+          {t.search.timeSlots.map((slot) => (
+            <option key={slot.value} value={slot.value}>{slot.label}</option>
+          ))}
         </select>
       </div>
 
@@ -281,11 +281,11 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
         disabled={loading}
         className="btn-primary w-full"
       >
-        {loading ? '🔍 Buscando...' : '🎣 Buscar salidas'}
+        {loading ? t.search.searching : t.search.searchButton}
       </button>
 
       <p className="text-xs text-gray-500 mt-4 text-center">
-        * Verás resultados ordenados por distancia en km. Cada zona tiene su pesca local
+        {t.search.hint}
       </p>
     </form>
   )
