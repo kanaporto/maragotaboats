@@ -37,13 +37,13 @@ export default function FranchiseeDashboard({
   const boats = franchisee?.boats || []
 
   // Mock reservations data
-  const mockReservations = [
+  const [mockReservations, setMockReservations] = useState([
     {
       id: '1',
       boatId: boats[0]?.id,
       customerName: 'Juan García López',
       customerEmail: 'juan@example.com',
-      date: '2024-09-20',
+      date: '2026-09-20',
       time: '08:00',
       numPeople: 4,
       totalPrice: 60,
@@ -54,13 +54,31 @@ export default function FranchiseeDashboard({
       boatId: boats[0]?.id,
       customerName: 'María Rodríguez',
       customerEmail: 'maria@example.com',
-      date: '2024-09-21',
+      date: '2026-09-21',
       time: '14:00',
       numPeople: 2,
       totalPrice: 60,
       status: 'pending',
     },
-  ]
+  ])
+
+  const [reschedulingId, setReschedulingId] = useState<string | null>(null)
+  const [rescheduleDate, setRescheduleDate] = useState('')
+  const [rescheduleTime, setRescheduleTime] = useState('')
+
+  const startReschedule = (id: string, currentDate: string, currentTime: string) => {
+    setReschedulingId(id)
+    setRescheduleDate(currentDate)
+    setRescheduleTime(currentTime)
+  }
+
+  const confirmReschedule = (id: string) => {
+    setMockReservations((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, date: rescheduleDate, time: rescheduleTime } : r))
+    )
+    // TODO: Integrar con backend real + email al cliente avisando del cambio (lib/emails.ts)
+    setReschedulingId(null)
+  }
 
   return (
     <div className="min-h-screen bg-maragota-light-gray">
@@ -303,6 +321,12 @@ export default function FranchiseeDashboard({
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-maragota-black">Reservas Recientes</h2>
 
+            <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg text-xs text-blue-900">
+              💡 Puedes cambiar la fecha u hora de una reserva si lo consideras necesario (mal tiempo,
+              disponibilidad del barco, etc). Esta opción es a tu criterio profesional y no se ofrece
+              públicamente a los clientes — avísales tú directamente del cambio.
+            </div>
+
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
@@ -313,6 +337,7 @@ export default function FranchiseeDashboard({
                     <th className="text-left py-4 px-4 font-bold text-maragota-black">Personas</th>
                     <th className="text-left py-4 px-4 font-bold text-maragota-black">Total</th>
                     <th className="text-left py-4 px-4 font-bold text-maragota-black">Estado</th>
+                    <th className="text-left py-4 px-4 font-bold text-maragota-black"></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -326,7 +351,24 @@ export default function FranchiseeDashboard({
                       </td>
                       <td className="py-4 px-4 text-gray-600">{boats.find((b) => b.id === res.boatId)?.name}</td>
                       <td className="py-4 px-4 text-gray-600">
-                        {new Date(res.date).toLocaleDateString('es-ES')} {res.time}
+                        {reschedulingId === res.id ? (
+                          <div className="flex gap-2 items-center">
+                            <input
+                              type="date"
+                              value={rescheduleDate}
+                              onChange={(e) => setRescheduleDate(e.target.value)}
+                              className="input-field text-xs py-1"
+                            />
+                            <input
+                              type="time"
+                              value={rescheduleTime}
+                              onChange={(e) => setRescheduleTime(e.target.value)}
+                              className="input-field text-xs py-1"
+                            />
+                          </div>
+                        ) : (
+                          <>{new Date(res.date).toLocaleDateString('es-ES')} {res.time}</>
+                        )}
                       </td>
                       <td className="py-4 px-4 text-gray-600">{res.numPeople}</td>
                       <td className="py-4 px-4 font-bold text-maragota-orange">{res.totalPrice}€</td>
@@ -340,6 +382,31 @@ export default function FranchiseeDashboard({
                         >
                           {res.status === 'confirmed' ? 'Confirmada' : 'Pendiente'}
                         </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        {reschedulingId === res.id ? (
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => confirmReschedule(res.id)}
+                              className="text-xs px-3 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                            >
+                              Guardar
+                            </button>
+                            <button
+                              onClick={() => setReschedulingId(null)}
+                              className="text-xs px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => startReschedule(res.id, res.date, res.time)}
+                            className="text-xs px-3 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
+                          >
+                            Cambiar fecha
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}

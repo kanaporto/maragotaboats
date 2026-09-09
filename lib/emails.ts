@@ -65,6 +65,30 @@ export async function sendReservationConfirmationEmail(data: ReservationEmailDat
   }
 }
 
+// Recordatorio enviado el día antes de la salida, para reducir no-shows.
+// NOTA: para que esto se dispare automáticamente hace falta guardar las
+// reservas reales en algún sitio consultable (hoy no persisten en ningún
+// lado) y un trigger programado que las revise a diario — pendiente de la
+// migración a base de datos real. La función y la plantilla ya están listas
+// para cuando exista esa pieza.
+export async function sendReminderEmail(data: ReservationEmailData) {
+  try {
+    console.log('📧 Email recordatorio (día antes):', {
+      to: data.to,
+      subject: `Recordatorio: tu salida de pesca es mañana - ${data.boatName}`,
+      customerName: data.customerName,
+      date: data.date,
+      time: data.time,
+      reservationId: data.reservationId,
+    })
+
+    return { success: true, messageId: `reminder-${data.reservationId}` }
+  } catch (error) {
+    console.error('Error enviando email de recordatorio:', error)
+    return { success: false, error: error instanceof Error ? error.message : 'Error desconocido' }
+  }
+}
+
 export async function sendMonthlyReportEmail(data: MonthlyReportData) {
   try {
     const changePercentage = data.trends
@@ -137,5 +161,21 @@ export function generateReservationEmailHTML(data: ReservationEmailData): string
       <li>ID de reserva: ${data.reservationId}</li>
     </ul>
     <p>¡Que disfrutes de la pesca!</p>
+  `
+}
+
+export function generateReminderEmailHTML(data: ReservationEmailData): string {
+  return `
+    <h1>🎣 ¡Tu salida de pesca es mañana!</h1>
+    <p>Hola ${data.customerName},</p>
+    <p>Te recordamos tu salida en el barco <strong>${data.boatName}</strong>.</p>
+    <ul>
+      <li>Fecha: ${data.date}</li>
+      <li>Hora: ${data.time}</li>
+      <li>Personas: ${data.numPeople}</li>
+    </ul>
+    <p>Recuerda que si no te presentas, la seña de la reserva no se reembolsa
+    (ver <a href="https://maragota-boats.pages.dev/legal/terminos">condiciones de reserva</a>).</p>
+    <p>¡Te esperamos!</p>
   `
 }

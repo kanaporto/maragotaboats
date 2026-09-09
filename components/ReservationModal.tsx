@@ -274,6 +274,13 @@ export default function ReservationModal({
                 </div>
               </div>
 
+              <p className="text-xs text-gray-500 mb-6">
+                Si no te presentas a la salida, la reserva no se reembolsa. Consulta las{' '}
+                <a href="/legal/terminos" target="_blank" rel="noopener noreferrer" className="text-maragota-orange hover:underline">
+                  condiciones de reserva
+                </a>.
+              </p>
+
               <div className="flex gap-3">
                 <button
                   type="button"
