@@ -1,2 +1,4 @@
 name = "maragota-boats"
 pages_build_output_dir = ".next"
+
+# Cloudflare Pages deployment
