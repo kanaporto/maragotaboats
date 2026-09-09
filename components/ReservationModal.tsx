@@ -15,6 +15,7 @@ interface Boat {
   name: string
   location: string
   franchisee: string
+  franchiseeId: string
   availableSeats: number
   totalSeats: number
 }
@@ -182,6 +183,27 @@ export default function ReservationModal({
     }).catch(() => {
       // Best-effort: el pago ya se confirmó, no bloqueamos al cliente si
       // falla el envío del email.
+    })
+
+    // Avisa al franquiciado (email + su webhook externo si lo tiene
+    // configurado en Ajustes).
+    fetch('/api/notify-franchisee', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        franchiseeId: boat.franchiseeId,
+        boatName: boat.name,
+        customerName: formData.fullName,
+        customerEmail: formData.email,
+        customerPhone: `${formData.countryDial} ${formData.phone}`,
+        numPeople: billedPeople,
+        date: searchParams.date,
+        time: searchParams.time,
+        reservationFeeTotal: billedPeople * reservationFee,
+        franchiseeFeeTotal: billedPeople * franchiseeFee,
+      }),
+    }).catch(() => {
+      // Best-effort.
     })
   }
 

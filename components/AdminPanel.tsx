@@ -1,8 +1,19 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { whatsappLink } from '@/lib/whatsapp'
 
-type AdminTab = 'franchisees' | 'leads' | 'analytics' | 'reports'
+type AdminTab = 'overview' | 'franchisees' | 'leads' | 'analytics' | 'reports'
+
+const PLATFORM_FEE = 15
+const FRANCHISEE_FEE = 45
+const LEAD_FUNNEL_ORDER: FranchiseLead['status'][] = [
+  'nuevo',
+  'primer_contacto',
+  'negociacion',
+  'documentos_firmados',
+  'implementado',
+]
 
 interface FranchiseeManagement {
   id: string
@@ -63,11 +74,6 @@ const LEAD_STATUS_COLORS: Record<FranchiseLead['status'], string> = {
   rechazado: 'bg-red-100 text-red-700',
 }
 
-function whatsappLink(phone: string) {
-  const digits = phone.replace(/[^\d]/g, '')
-  return `https://wa.me/${digits}`
-}
-
 // Datos de ejemplo para presentar el panel — sustituir por datos reales
 // cuando haya reservas de verdad.
 const UPCOMING_RESERVATIONS = [
@@ -97,7 +103,7 @@ const FRANCHISE_RANKING = [
 ]
 
 export default function AdminPanel({ onLogout }: AdminPanelProps) {
-  const [activeTab, setActiveTab] = useState<AdminTab>('franchisees')
+  const [activeTab, setActiveTab] = useState<AdminTab>('overview')
 
   const [franchisees, setFranchisees] = useState<FranchiseeManagement[]>([
     {
@@ -160,6 +166,8 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
 
   const [selectedFranchisee, setSelectedFranchisee] = useState<FranchiseeManagement | null>(null)
   const [toast, setToast] = useState('')
+  const [franchiseeSearch, setFranchiseeSearch] = useState('')
+  const [leadSearch, setLeadSearch] = useState('')
 
   const [showNewFranchiseeForm, setShowNewFranchiseeForm] = useState(false)
   const [newFranchisee, setNewFranchisee] = useState({
@@ -266,6 +274,44 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
     monthOverMonth: 12.5,
   }
 
+  const platformRevenue = mockAnalytics.totalReservations * PLATFORM_FEE
+  const franchiseePayout = mockAnalytics.totalReservations * FRANCHISEE_FEE
+
+  const pendingLeadsCount = leads.filter(
+    (l) => l.status !== 'implementado' && l.status !== 'rechazado'
+  ).length
+
+  const activeFranchiseesCount = franchisees.filter((f) => f.status === 'active').length
+
+  const leadFunnel = useMemo(
+    () =>
+      LEAD_FUNNEL_ORDER.map((status) => ({
+        status,
+        count: leads.filter((l) => l.status === status).length,
+      })),
+    [leads]
+  )
+  const leadFunnelMax = Math.max(1, ...leadFunnel.map((s) => s.count))
+
+  const filteredFranchisees = useMemo(() => {
+    const q = franchiseeSearch.trim().toLowerCase()
+    if (!q) return franchisees
+    return franchisees.filter(
+      (f) =>
+        f.name.toLowerCase().includes(q) ||
+        f.owner.toLowerCase().includes(q) ||
+        f.city.toLowerCase().includes(q)
+    )
+  }, [franchisees, franchiseeSearch])
+
+  const filteredLeads = useMemo(() => {
+    const q = leadSearch.trim().toLowerCase()
+    if (!q) return leads
+    return leads.filter(
+      (l) => l.fullName.toLowerCase().includes(q) || l.city.toLowerCase().includes(q)
+    )
+  }, [leads, leadSearch])
+
   return (
     <div className="min-h-screen bg-maragota-light-gray">
       {toast && (
@@ -297,6 +343,16 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex gap-8 overflow-x-auto">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`py-4 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                activeTab === 'overview'
+                  ? 'text-maragota-orange border-maragota-orange'
+                  : 'text-gray-600 border-transparent hover:text-maragota-orange'
+              }`}
+            >
+              🏠 Resumen
+            </button>
             <button
               onClick={() => setActiveTab('franchisees')}
               className={`py-4 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
@@ -343,6 +399,88 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Overview Tab */}
+        {activeTab === 'overview' && (
+          <div className="space-y-6">
+            <h2 className="text-3xl font-bold text-maragota-black">Resumen</h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="card text-center">
+                <p className="text-sm text-gray-600 mb-2">Ingresos de la plataforma</p>
+                <p className="text-3xl font-bold text-maragota-orange">{platformRevenue.toLocaleString('es-ES')}€</p>
+                <p className="text-xs text-gray-500 mt-2">Este mes · {mockAnalytics.totalReservations} reservas</p>
+              </div>
+              <div className="card text-center">
+                <p className="text-sm text-gray-600 mb-2">Reservas totales</p>
+                <p className="text-3xl font-bold text-maragota-black">{mockAnalytics.totalReservations}</p>
+                <p className="text-xs text-green-600 mt-2">↑ +12.5% vs mes anterior</p>
+              </div>
+              <div className="card text-center">
+                <p className="text-sm text-gray-600 mb-2">Franquicias activas</p>
+                <p className="text-3xl font-bold text-maragota-black">{activeFranchiseesCount}</p>
+                <p className="text-xs text-gray-500 mt-2">de {franchisees.length} totales</p>
+              </div>
+              <div className="card text-center">
+                <p className="text-sm text-gray-600 mb-2">Solicitudes pendientes</p>
+                <p className="text-3xl font-bold text-maragota-black">{pendingLeadsCount}</p>
+                <p className="text-xs text-gray-500 mt-2">en el embudo de expansión</p>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-maragota-black">📥 Embudo de solicitudes</h3>
+                <button onClick={() => setActiveTab('leads')} className="text-sm text-maragota-orange hover:underline">
+                  Ver todas →
+                </button>
+              </div>
+              <div className="space-y-3">
+                {leadFunnel.map((stage) => (
+                  <div key={stage.status} className="flex items-center gap-4">
+                    <span className="text-xs text-gray-600 w-40 shrink-0">{LEAD_STATUS_LABELS[stage.status]}</span>
+                    <div className="flex-1 h-6 bg-gray-100 rounded overflow-hidden">
+                      <div
+                        className="h-full bg-maragota-orange rounded flex items-center justify-end px-2"
+                        style={{ width: `${Math.max((stage.count / leadFunnelMax) * 100, stage.count > 0 ? 8 : 0)}%` }}
+                      >
+                        {stage.count > 0 && <span className="text-white text-xs font-bold">{stage.count}</span>}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-maragota-black">🏆 Ranking de Franquicias</h3>
+                <button onClick={() => setActiveTab('analytics')} className="text-sm text-maragota-orange hover:underline">
+                  Ver analytics →
+                </button>
+              </div>
+              <div className="space-y-3">
+                {FRANCHISE_RANKING.slice(0, 3).map((f, i) => (
+                  <div key={f.name} className="flex items-center gap-4">
+                    <span className="text-xl font-bold text-gray-400 w-6">{i + 1}</span>
+                    <div className="flex-1">
+                      <div className="flex justify-between mb-1">
+                        <span className="font-semibold text-sm">{f.name}</span>
+                        <span className="text-sm text-gray-600">{f.reservations} reservas · ⭐ {f.rating}</span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-200 rounded">
+                        <div
+                          className="h-full bg-maragota-orange rounded"
+                          style={{ width: `${(f.reservations / FRANCHISE_RANKING[0].reservations) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Franchisees Tab */}
         {activeTab === 'franchisees' && (
           <div className="space-y-6">
@@ -423,9 +561,20 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
               </form>
             )}
 
+            <input
+              type="text"
+              value={franchiseeSearch}
+              onChange={(e) => setFranchiseeSearch(e.target.value)}
+              placeholder="🔍 Buscar por nombre, propietario o ciudad..."
+              className="input-field"
+            />
+
             {/* Franchisees List */}
             <div className="space-y-4">
-              {franchisees.map((franchisee) => (
+              {filteredFranchisees.length === 0 && (
+                <p className="text-gray-500 text-sm">No hay franquicias que coincidan con &ldquo;{franchiseeSearch}&rdquo;.</p>
+              )}
+              {filteredFranchisees.map((franchisee) => (
                 <div key={franchisee.id} className="card">
                   <div className="flex items-start justify-between mb-4">
                     <div>
@@ -531,8 +680,39 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
               </div>
             )}
 
+            {leads.length > 0 && (
+              <div className="card">
+                <h3 className="text-sm font-bold text-maragota-black mb-3">Embudo de solicitudes</h3>
+                <div className="space-y-2">
+                  {leadFunnel.map((stage) => (
+                    <div key={stage.status} className="flex items-center gap-3">
+                      <span className="text-xs text-gray-600 w-40 shrink-0">{LEAD_STATUS_LABELS[stage.status]}</span>
+                      <div className="flex-1 h-5 bg-gray-100 rounded overflow-hidden">
+                        <div
+                          className="h-full bg-maragota-orange rounded flex items-center justify-end px-2"
+                          style={{ width: `${Math.max((stage.count / leadFunnelMax) * 100, stage.count > 0 ? 8 : 0)}%` }}
+                        >
+                          {stage.count > 0 && <span className="text-white text-xs font-bold">{stage.count}</span>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {leads.length > 0 && (
+              <input
+                type="text"
+                value={leadSearch}
+                onChange={(e) => setLeadSearch(e.target.value)}
+                placeholder="🔍 Buscar por nombre o ciudad..."
+                className="input-field"
+              />
+            )}
+
             <div className="space-y-4">
-              {leads.map((lead) => (
+              {filteredLeads.map((lead) => (
                 <div key={lead.id} className="card">
                   <div className="flex items-start justify-between mb-3">
                     <div>
@@ -614,6 +794,25 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
                 <p className="text-sm text-gray-600 mb-2">Provincia Top</p>
                 <p className="text-lg font-bold text-maragota-black">Pontevedra</p>
                 <p className="text-xs text-gray-500 mt-2">247 reservas</p>
+              </div>
+            </div>
+
+            {/* Reparto de ingresos */}
+            <div className="card">
+              <h3 className="text-lg font-bold text-maragota-black mb-4">💶 Reparto de ingresos (este mes)</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="bg-maragota-light-gray p-4 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Generado por la red</p>
+                  <p className="text-2xl font-bold text-maragota-black">{mockAnalytics.totalRevenue.toLocaleString('es-ES')}€</p>
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg border border-orange-200">
+                  <p className="text-xs text-gray-600 mb-1">Ingresos de Maragota Boats ({PLATFORM_FEE}€/reserva)</p>
+                  <p className="text-2xl font-bold text-maragota-orange">{platformRevenue.toLocaleString('es-ES')}€</p>
+                </div>
+                <div className="bg-maragota-light-gray p-4 rounded-lg">
+                  <p className="text-xs text-gray-600 mb-1">Pagado a franquiciados ({FRANCHISEE_FEE}€/reserva)</p>
+                  <p className="text-2xl font-bold text-maragota-black">{franchiseePayout.toLocaleString('es-ES')}€</p>
+                </div>
               </div>
             </div>
 
