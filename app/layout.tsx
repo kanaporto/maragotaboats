@@ -3,7 +3,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import DevGate from '@/components/DevGate'
-import BrevoChat from '@/components/BrevoChat'
+import WhatsAppButton from '@/components/WhatsAppButton'
 import { LocaleProvider } from '@/lib/i18n/context'
 
 export const metadata: Metadata = {
@@ -26,7 +26,7 @@ export default function RootLayout({
               {children}
             </main>
             <Footer />
-            <BrevoChat />
+            <WhatsAppButton />
           </DevGate>
         </LocaleProvider>
       </body>

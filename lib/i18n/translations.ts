@@ -29,6 +29,11 @@ export interface Translations {
     franquiciate: string
     franquiciado: string
   }
+  whatsapp: {
+    ariaLabel: string
+    tooltip: string
+    defaultMessage: string
+  }
   footer: {
     forProfessionals: string
     terms: string
@@ -168,6 +173,11 @@ export const es: Translations = {
     franquiciate: 'Franquíciate',
     franquiciado: 'Acceso franquiciados',
   },
+  whatsapp: {
+    ariaLabel: 'Escríbenos por WhatsApp',
+    tooltip: '¿Dudas? Escríbenos',
+    defaultMessage: 'Hola, tengo una pregunta sobre Maragota Boats',
+  },
   footer: {
     forProfessionals: '¿Tienes un barco?',
     terms: 'Condiciones de reserva',
@@ -204,6 +214,11 @@ export const es: Translations = {
         icon: '🎣',
         title: 'Patrones que conocen su mar',
         description: 'Cada franquiciado opera su propia zona y sabe dónde está la pesca en cada época del año.',
+      },
+      {
+        icon: '🤝',
+        title: 'Trato cercano y familiar',
+        description: 'Somos patrones y familias de toda la vida, no una gran empresa anónima. Te tratamos como a uno más.',
       },
       {
         icon: '💶',
@@ -346,6 +361,11 @@ export const en: Translations = {
     franquiciate: 'Become a franchisee',
     franquiciado: 'Franchisee login',
   },
+  whatsapp: {
+    ariaLabel: 'Message us on WhatsApp',
+    tooltip: 'Questions? Message us',
+    defaultMessage: 'Hi, I have a question about Maragota Boats',
+  },
   footer: {
     forProfessionals: 'Have a boat?',
     terms: 'Booking terms',
@@ -382,6 +402,11 @@ export const en: Translations = {
         icon: '🎣',
         title: 'Skippers who know their waters',
         description: 'Each franchisee operates their own area and knows where the fish are all year round.',
+      },
+      {
+        icon: '🤝',
+        title: 'A warm, personal welcome',
+        description: "We're skippers and families, not a faceless company. You're treated like one of our own.",
       },
       {
         icon: '💶',
@@ -524,6 +549,11 @@ export const fr: Translations = {
     franquiciate: 'Devenir franchisé',
     franquiciado: 'Espace franchisé',
   },
+  whatsapp: {
+    ariaLabel: 'Écrivez-nous sur WhatsApp',
+    tooltip: 'Des questions ? Écrivez-nous',
+    defaultMessage: "Bonjour, j'ai une question sur Maragota Boats",
+  },
   footer: {
     forProfessionals: 'Vous avez un bateau ?',
     terms: 'Conditions de réservation',
@@ -560,6 +590,11 @@ export const fr: Translations = {
         icon: '🎣',
         title: 'Des patrons qui connaissent leur mer',
         description: 'Chaque franchisé gère sa propre zone et sait où se trouve le poisson toute l\'année.',
+      },
+      {
+        icon: '🤝',
+        title: 'Un accueil chaleureux et familial',
+        description: 'Nous sommes des patrons et des familles, pas une grande entreprise anonyme. Vous êtes traité comme l\'un des nôtres.',
       },
       {
         icon: '💶',
