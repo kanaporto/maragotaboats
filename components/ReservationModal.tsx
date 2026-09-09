@@ -79,6 +79,26 @@ export default function ReservationModal({
     setStep('payment')
   }
 
+  const sendConfirmationEmail = () => {
+    fetch('/api/send-confirmation-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        to: formData.email,
+        customerName: formData.fullName,
+        boatName: boat.name,
+        numPeople: formData.numPeople,
+        date: searchParams.date,
+        time: searchParams.time,
+        reservationFeeTotal: formData.numPeople * reservationFee,
+        franchiseeFeeTotal: formData.numPeople * franchiseeFee,
+      }),
+    }).catch(() => {
+      // Best-effort: el pago ya se confirmó, no bloqueamos al cliente si
+      // falla el envío del email.
+    })
+  }
+
   const handlePayment = async (method: 'applepay' | 'bizum' | 'googlepay') => {
     setPaymentMethod(method)
     setLoading(true)
@@ -88,23 +108,7 @@ export default function ReservationModal({
       // Aquí se integraría con un procesador de pagos real
       await new Promise((resolve) => setTimeout(resolve, 2000))
 
-      // Enviar email de confirmación
-      const emailData = {
-        to: formData.email,
-        subject: 'Reserva confirmada - Maragota Boats',
-        reservation: {
-          boat: boat.name,
-          numPeople: formData.numPeople,
-          date: searchParams.date,
-          time: searchParams.time,
-          totalPrice: formData.numPeople * 60,
-          customerName: formData.fullName,
-        }
-      }
-
-      // TODO: Integrar con Resend para enviar email
-      console.log('Email de confirmación:', emailData)
-
+      sendConfirmationEmail()
       setStep('confirmation')
     } catch (err) {
       setError(t.reservationModal.errorPaymentGeneric)
@@ -114,7 +118,7 @@ export default function ReservationModal({
   }
 
   const handleStripeSuccess = () => {
-    // TODO: Integrar con Resend para enviar email (ver lib/emails.ts)
+    sendConfirmationEmail()
     setStep('confirmation')
   }
 

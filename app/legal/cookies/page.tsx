@@ -1,7 +1,7 @@
 import LegalNav from '@/components/LegalNav'
 
 export const metadata = {
-  title: 'Cookies - Maragota Boats',
+  title: 'Cookies',
 }
 
 export default function CookiesPage() {

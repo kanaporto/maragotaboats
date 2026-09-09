@@ -50,9 +50,14 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
           setLoading(false)
         },
         (err) => {
-          setError(t.search.errorGeoFailed)
+          setError(err.code === err.PERMISSION_DENIED ? t.search.errorGeoDenied : t.search.errorGeoFailed)
           setLoading(false)
           console.error(err)
+        },
+        {
+          enableHighAccuracy: false,
+          timeout: 10000,
+          maximumAge: 60000,
         }
       )
     } else {

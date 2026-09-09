@@ -1,7 +1,7 @@
 import LegalNav from '@/components/LegalNav'
 
 export const metadata = {
-  title: 'Aviso legal - Maragota Boats',
+  title: 'Aviso legal',
 }
 
 export default function AvisoLegalPage() {

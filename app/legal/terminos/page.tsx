@@ -1,7 +1,7 @@
 import LegalNav from '@/components/LegalNav'
 
 export const metadata = {
-  title: 'Condiciones de reserva - Maragota Boats',
+  title: 'Condiciones de reserva',
 }
 
 export default function TerminosPage() {

@@ -1,7 +1,7 @@
 import LegalNav from '@/components/LegalNav'
 
 export const metadata = {
-  title: 'Privacidad - Maragota Boats',
+  title: 'Privacidad',
 }
 
 export default function PrivacidadPage() {

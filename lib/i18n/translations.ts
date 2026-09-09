@@ -91,6 +91,7 @@ export interface Translations {
     errorSelectProvince: string
     errorEnterPostal: string
     errorGeoFailed: string
+    errorGeoDenied: string
     errorGeoUnsupported: string
     errorPostalNotFound: string
     errorPostalGeneric: string
@@ -272,6 +273,7 @@ export const es: Translations = {
     errorSelectProvince: 'Por favor selecciona una provincia',
     errorEnterPostal: 'Por favor ingresa un código postal',
     errorGeoFailed: 'No se pudo obtener tu ubicación. Intenta buscando por código postal.',
+    errorGeoDenied: 'Has bloqueado el permiso de ubicación. Actívalo en los ajustes del navegador o busca por código postal.',
     errorGeoUnsupported: 'Tu navegador no soporta geolocalización.',
     errorPostalNotFound: 'Código postal no encontrado. Intenta con otro.',
     errorPostalGeneric: 'Error al buscar por código postal.',
@@ -460,6 +462,7 @@ export const en: Translations = {
     errorSelectProvince: 'Please select a province',
     errorEnterPostal: 'Please enter a postal code',
     errorGeoFailed: "We couldn't get your location. Try searching by postal code instead.",
+    errorGeoDenied: "Location access is blocked. Enable it in your browser settings, or search by postal code instead.",
     errorGeoUnsupported: "Your browser doesn't support geolocation.",
     errorPostalNotFound: 'Postal code not found. Try another one.',
     errorPostalGeneric: 'Error searching by postal code.',
@@ -648,6 +651,7 @@ export const fr: Translations = {
     errorSelectProvince: 'Veuillez sélectionner une province',
     errorEnterPostal: 'Veuillez saisir un code postal',
     errorGeoFailed: "Impossible d'obtenir votre position. Essayez de rechercher par code postal.",
+    errorGeoDenied: "L'accès à la position est bloqué. Activez-le dans les paramètres du navigateur, ou recherchez par code postal.",
     errorGeoUnsupported: 'Votre navigateur ne prend pas en charge la géolocalisation.',
     errorPostalNotFound: 'Code postal introuvable. Essayez-en un autre.',
     errorPostalGeneric: 'Erreur lors de la recherche par code postal.',

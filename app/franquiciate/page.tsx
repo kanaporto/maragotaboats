@@ -1,5 +1,10 @@
 import FranchiseInquiryForm from '@/components/FranchiseInquiryForm'
 
+export const metadata = {
+  title: 'Franquíciate',
+  description: 'Únete a la red de franquicias Maragota Boats. Te damos el barco, tú sales a pescar.',
+}
+
 const STEPS = [
   {
     icon: '📝',
