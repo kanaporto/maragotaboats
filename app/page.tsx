@@ -2,6 +2,8 @@
 
 import SearchForm from '@/components/SearchForm'
 import AvailabilityList from '@/components/AvailabilityList'
+import FeaturedFranchises from '@/components/FeaturedFranchises'
+import WhyChooseUs from '@/components/WhyChooseUs'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { PENDING_RESERVATION_KEY } from '@/components/StripePaymentForm'
@@ -46,6 +48,18 @@ export default function Home() {
       window.history.replaceState({}, '', window.location.pathname)
     }
   }, [])
+
+  // Lleva al usuario a los resultados cuando aparecen, tanto si vienen del
+  // formulario de búsqueda como de una tarjeta de "Franquicias destacadas".
+  useEffect(() => {
+    if (searchParams) {
+      document.getElementById('resultados')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [searchParams])
+
+  const handleSelectProvince = (province: string) => {
+    setSearchParams({ province })
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-maragota-light-gray to-white relative">
@@ -94,7 +108,7 @@ export default function Home() {
 
       {/* Results Section */}
       {searchParams && (
-        <section className="py-12 px-4">
+        <section id="resultados" className="py-12 px-4 scroll-mt-20">
           <div className="max-w-4xl mx-auto">
             <AvailabilityList searchParams={searchParams} />
           </div>
@@ -102,30 +116,36 @@ export default function Home() {
       )}
 
       {!searchParams && (
-        <section className="py-12 px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="card">
-              <h2 className="text-2xl font-bold text-maragota-black mb-4">¿Cómo funciona?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
-                <div>
-                  <div className="text-4xl text-maragota-orange mb-4">🔍</div>
-                  <h3 className="font-bold mb-2">1. Busca</h3>
-                  <p className="text-gray-600">Encuentra la salida perfecta cerca de ti</p>
-                </div>
-                <div>
-                  <div className="text-4xl text-maragota-orange mb-4">📅</div>
-                  <h3 className="font-bold mb-2">2. Selecciona</h3>
-                  <p className="text-gray-600">Elige la fecha, hora y número de personas</p>
-                </div>
-                <div>
-                  <div className="text-4xl text-maragota-orange mb-4">🎣</div>
-                  <h3 className="font-bold mb-2">3. Reserva</h3>
-                  <p className="text-gray-600">Confirma tu reserva y ¡a pescar!</p>
+        <>
+          <FeaturedFranchises onSelectProvince={handleSelectProvince} />
+
+          <WhyChooseUs />
+
+          <section className="py-12 px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="card">
+                <h2 className="text-2xl font-bold text-maragota-black mb-4">¿Cómo funciona?</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
+                  <div>
+                    <div className="text-4xl text-maragota-orange mb-4">🔍</div>
+                    <h3 className="font-bold mb-2">1. Busca</h3>
+                    <p className="text-gray-600">Encuentra la salida perfecta cerca de ti</p>
+                  </div>
+                  <div>
+                    <div className="text-4xl text-maragota-orange mb-4">📅</div>
+                    <h3 className="font-bold mb-2">2. Selecciona</h3>
+                    <p className="text-gray-600">Elige la fecha, hora y número de personas</p>
+                  </div>
+                  <div>
+                    <div className="text-4xl text-maragota-orange mb-4">🎣</div>
+                    <h3 className="font-bold mb-2">3. Reserva</h3>
+                    <p className="text-gray-600">Confirma tu reserva y ¡a pescar!</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </>
       )}
     </div>
   )
