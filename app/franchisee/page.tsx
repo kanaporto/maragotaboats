@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import FranchiseeDashboard from '@/components/FranchiseeDashboard'
 import FranchiseeLogin from '@/components/FranchiseeLogin'
 
@@ -15,7 +14,6 @@ interface FranchiseeSession {
 export default function FranchiseePanel() {
   const [session, setSession] = useState<FranchiseeSession | null>(null)
   const [loading, setLoading] = useState(true)
-  const router = useRouter()
 
   useEffect(() => {
     // Check if there's a session in localStorage
