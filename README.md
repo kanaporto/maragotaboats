@@ -299,3 +299,4 @@ Para modificar datos de demostración, edita `lib/dummyData.ts`
 ---
 
 **© 2024 Maragota Boats. Todos los derechos reservados.**
+# Maragota-Boats
