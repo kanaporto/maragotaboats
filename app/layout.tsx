@@ -3,6 +3,7 @@ import './globals.css'
 import Navbar from '@/components/Navbar'
 import Footer from '@/components/Footer'
 import DevGate from '@/components/DevGate'
+import BrevoChat from '@/components/BrevoChat'
 
 export const metadata: Metadata = {
   title: 'Maragota Boats - Reservas de Pesca',
@@ -23,6 +24,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
+          <BrevoChat />
         </DevGate>
       </body>
     </html>

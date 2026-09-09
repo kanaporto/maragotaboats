@@ -57,6 +57,14 @@ export default function CookiesPage() {
               stripe.com/es/privacy
             </a>.
           </p>
+          <p className="mt-3">
+            El chat de atención al cliente de esta web lo proporciona Brevo, que instala sus propias
+            cookies para mantener la conversación abierta mientras navegas. Puedes consultar su
+            política en{' '}
+            <a href="https://www.brevo.com/legal/privacypolicy/" className="text-maragota-orange hover:underline" target="_blank" rel="noopener noreferrer">
+              brevo.com/legal/privacypolicy
+            </a>.
+          </p>
         </section>
 
         <section>
