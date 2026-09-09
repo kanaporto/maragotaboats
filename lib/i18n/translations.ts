@@ -30,6 +30,7 @@ export interface Translations {
     franquiciado: string
   }
   footer: {
+    forProfessionals: string
     terms: string
     privacy: string
     legal: string
@@ -165,9 +166,10 @@ export const es: Translations = {
   nav: {
     reservas: 'Reservas',
     franquiciate: 'Franquíciate',
-    franquiciado: 'Franquiciado',
+    franquiciado: 'Acceso franquiciados',
   },
   footer: {
+    forProfessionals: '¿Tienes un barco?',
     terms: 'Condiciones de reserva',
     privacy: 'Privacidad',
     legal: 'Aviso legal',
@@ -345,6 +347,7 @@ export const en: Translations = {
     franquiciado: 'Franchisee login',
   },
   footer: {
+    forProfessionals: 'Have a boat?',
     terms: 'Booking terms',
     privacy: 'Privacy',
     legal: 'Legal notice',
@@ -522,6 +525,7 @@ export const fr: Translations = {
     franquiciado: 'Espace franchisé',
   },
   footer: {
+    forProfessionals: 'Vous avez un bateau ?',
     terms: 'Conditions de réservation',
     privacy: 'Confidentialité',
     legal: 'Mentions légales',

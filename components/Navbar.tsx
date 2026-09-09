@@ -70,14 +70,8 @@ export default function Navbar() {
         </Link>
 
         <div className="flex gap-4 sm:gap-6 items-center">
-          <Link href="/" className="hidden sm:inline hover:text-maragota-orange transition-colors">
+          <Link href="/" className="hover:text-maragota-orange transition-colors">
             {t.nav.reservas}
-          </Link>
-          <Link href="/franquiciate" className="hidden sm:inline hover:text-maragota-orange transition-colors">
-            {t.nav.franquiciate}
-          </Link>
-          <Link href="/login" className="text-maragota-orange font-semibold hover:text-orange-300 transition-colors">
-            {t.nav.franquiciado}
           </Link>
 
           <div className="border-l border-gray-700 pl-4">
