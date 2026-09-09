@@ -251,7 +251,7 @@ export default function ReservationModal({
     : ''
 
   const shareWhatsAppHref = `https://api.whatsapp.com/send?text=${encodeURIComponent(
-    `${t.reservationModal.shareWhatsAppMessage(boat.name, shareDateTime)} ${SITE_URL}`
+    `${t.reservationModal.shareWhatsAppMessage(boat.name, boat.location, shareDateTime)} ${SITE_URL}`
   )}`
 
   if (!isOpen) return null
