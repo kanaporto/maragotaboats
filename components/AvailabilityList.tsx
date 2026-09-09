@@ -151,6 +151,19 @@ export default function AvailabilityList({ searchParams }: AvailabilityListProps
                     </div>
                   </div>
 
+                  {/* Qué incluye */}
+                  <div className="mb-4 p-3 bg-green-50 border-l-4 border-green-400 rounded">
+                    <p className="text-xs font-semibold text-green-900 mb-2">✓ Tu salida incluye:</p>
+                    <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-xs text-green-900">
+                      <span>Equipo de pesca y cebo</span>
+                      <span>Seguro y licencia colectiva</span>
+                      <span>Chaleco salvavidas</span>
+                      <span>Monitor guía a bordo</span>
+                      <span>GPS / sonda de pesca</span>
+                      <span>Combustible incluido</span>
+                    </div>
+                  </div>
+
                   {/* Seats info */}
                   <div className="mb-4">
                     <p className="text-sm text-gray-600 mb-2">Sitios disponibles: {boat.availableSeats}/{boat.totalSeats}</p>
