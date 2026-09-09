@@ -4,7 +4,7 @@ import { SearchParams } from '@/app/page'
 import { useState } from 'react'
 import ReservationModal from './ReservationModal'
 import { getAllFranchisees, searchFranchisees } from '@/lib/dummyData'
-import { getZonesNearby, calculateDistance, getZoneByCity, FISHING_ZONES } from '@/lib/fishingZones'
+import { calculateDistance, getZoneByCity, FISHING_ZONES } from '@/lib/fishingZones'
 
 interface BoatWithFranchisee {
   id: string
