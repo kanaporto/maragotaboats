@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { getAllFranchisees, DUMMY_FRANCHISEES, Franchisee } from '@/lib/dummyData'
 
 type AdminTab = 'franchisees' | 'analytics' | 'reports' | 'new-franchisee'
 
