@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Navbar from '@/components/Navbar'
+import DevGate from '@/components/DevGate'
 
 export const metadata: Metadata = {
   title: 'Maragota Boats - Reservas de Pesca',
@@ -15,10 +16,12 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="bg-maragota-white">
-        <Navbar />
-        <main>
-          {children}
-        </main>
+        <DevGate>
+          <Navbar />
+          <main>
+            {children}
+          </main>
+        </DevGate>
       </body>
     </html>
   )
