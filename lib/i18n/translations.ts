@@ -178,7 +178,7 @@ export interface Translations {
     backHomeButton: string
     addToCalendarButton: string
     shareWhatsAppButton: string
-    shareWhatsAppMessage: string
+    shareWhatsAppMessage: (boatName: string, dateTime: string) => string
     whatToBringTitle: string
     whatToBringItems: string[]
   }
@@ -387,7 +387,7 @@ export const es: Translations = {
     backHomeButton: 'Volver al inicio',
     addToCalendarButton: '📅 Añadir al calendario',
     shareWhatsAppButton: '💬 Compartir por WhatsApp',
-    shareWhatsAppMessage: '¡He reservado una salida de pesca con Maragota Boats! 🎣 Reserva la tuya:',
+    shareWhatsAppMessage: (boatName, dateTime) => `¡He reservado una salida de pesca con Maragota Boats en ${boatName}${dateTime}! 🎣 Reserva la tuya:`,
     whatToBringTitle: '🎒 Qué llevar el día de la salida',
     whatToBringItems: [
       'Protector solar y gorra',
@@ -627,7 +627,7 @@ export const en: Translations = {
     backHomeButton: 'Back to home',
     addToCalendarButton: '📅 Add to calendar',
     shareWhatsAppButton: '💬 Share on WhatsApp',
-    shareWhatsAppMessage: 'I just booked a fishing trip with Maragota Boats! 🎣 Book yours:',
+    shareWhatsAppMessage: (boatName, dateTime) => `I just booked a fishing trip with Maragota Boats on ${boatName}${dateTime}! 🎣 Book yours:`,
     whatToBringTitle: '🎒 What to bring on the day',
     whatToBringItems: [
       'Sunscreen and a cap',
@@ -867,7 +867,7 @@ export const fr: Translations = {
     backHomeButton: "Retour à l'accueil",
     addToCalendarButton: '📅 Ajouter au calendrier',
     shareWhatsAppButton: '💬 Partager sur WhatsApp',
-    shareWhatsAppMessage: "Je viens de réserver une sortie de pêche avec Maragota Boats ! 🎣 Réservez la vôtre :",
+    shareWhatsAppMessage: (boatName, dateTime) => `Je viens de réserver une sortie de pêche avec Maragota Boats à bord de ${boatName}${dateTime} ! 🎣 Réservez la vôtre :`,
     whatToBringTitle: '🎒 Quoi apporter le jour J',
     whatToBringItems: [
       'Crème solaire et casquette',

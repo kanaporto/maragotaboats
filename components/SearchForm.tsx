@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { SearchParams } from '@/app/page'
-import { getCoordinatesFromPostalCode } from '@/lib/fishingZones'
+import { getCoordinatesFromPostalCode, getCoordinatesFromCity } from '@/lib/fishingZones'
 import { useLocale } from '@/lib/i18n/context'
 
 const SPANISH_PROVINCES = [
@@ -71,7 +71,11 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
     setError('')
 
     try {
-      const coords = await getCoordinatesFromPostalCode(postalCode)
+      const query = postalCode.trim()
+      // El campo acepta código postal o nombre de población; probamos
+      // ambos, ya que antes solo se comprobaba el código postal.
+      const coords =
+        (await getCoordinatesFromPostalCode(query)) || (await getCoordinatesFromCity(query))
       if (coords) {
         onSearch({
           nearMe: true,

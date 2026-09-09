@@ -8,6 +8,7 @@ import { COUNTRY_CODES } from '@/lib/countryCodes'
 
 const STRIPE_CONFIGURED = Boolean(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 const SITE_URL = 'https://maragota-boats.pages.dev'
+const DATE_LOCALES: Record<string, string> = { es: 'es-ES', en: 'en-GB', fr: 'fr-FR' }
 
 interface Boat {
   id: string
@@ -39,7 +40,7 @@ export default function ReservationModal({
   isOpen,
   onClose,
 }: ReservationModalProps) {
-  const { t } = useLocale()
+  const { t, locale } = useLocale()
   const [step, setStep] = useState<'people' | 'details' | 'payment' | 'confirmation'>('people')
   const [bookingType, setBookingType] = useState<'shared' | 'private'>('shared')
   const [formData, setFormData] = useState({
@@ -51,7 +52,7 @@ export default function ReservationModal({
     confirmEmail: '',
   })
   const [acceptedTerms, setAcceptedTerms] = useState(false)
-  const [, setPaymentMethod] = useState<'applepay' | 'bizum' | 'googlepay' | null>(null)
+  const [, setPaymentMethod] = useState<'applepay' | 'bizum' | 'googlepay' | 'card' | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const modalRef = useRef<HTMLDivElement>(null)
@@ -184,7 +185,7 @@ export default function ReservationModal({
     })
   }
 
-  const handlePayment = async (method: 'applepay' | 'bizum' | 'googlepay') => {
+  const handlePayment = async (method: 'applepay' | 'bizum' | 'googlepay' | 'card') => {
     setPaymentMethod(method)
     setLoading(true)
     setError('')
@@ -245,8 +246,12 @@ export default function ReservationModal({
     URL.revokeObjectURL(url)
   }
 
+  const shareDateTime = searchParams.date
+    ? ` — ${new Date(searchParams.date).toLocaleDateString(DATE_LOCALES[locale])}${searchParams.time ? ` ${searchParams.time}` : ''}`
+    : ''
+
   const shareWhatsAppHref = `https://api.whatsapp.com/send?text=${encodeURIComponent(
-    `${t.reservationModal.shareWhatsAppMessage} ${SITE_URL}`
+    `${t.reservationModal.shareWhatsAppMessage(boat.name, shareDateTime)} ${SITE_URL}`
   )}`
 
   if (!isOpen) return null
@@ -533,7 +538,15 @@ export default function ReservationModal({
                   </button>
 
                   <button
-                    onClick={() => handlePayment('bizum')}
+                    onClick={() => handlePayment('card')}
+                    disabled={loading}
+                    className="w-full p-4 border-2 border-maragota-light-gray rounded-lg hover:border-maragota-orange transition-colors flex items-center justify-center gap-3 font-semibold disabled:opacity-50"
+                  >
+                    <span className="text-2xl">💳</span> {t.reservationModal.cardLabel}
+                  </button>
+
+                  <button
+                    onClick={() => handlePayment('card')}
                     disabled={loading}
                     className="btn-primary w-full"
                   >
