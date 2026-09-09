@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { getFranchiseeById, getAllFranchisees, DUMMY_FRANCHISEES, Franchisee } from '@/lib/dummyData'
+import { getFranchiseeById, getAllFranchisees } from '@/lib/dummyData'
 import AdminPanel from './AdminPanel'
 
 interface FranchiseeSession {
@@ -28,14 +28,13 @@ export default function FranchiseeDashboard({
   }
 
   const [activeTab, setActiveTab] = useState<TabType>('overview')
-  const [selectedBoatId, setSelectedBoatId] = useState<string | null>(null)
-  const [showEditModal, setShowEditModal] = useState(false)
+  const [, setSelectedBoatId] = useState<string | null>(null)
+  const [, setShowEditModal] = useState(false)
 
   const franchisee = session.isAdmin ? null : getFranchiseeById(session.franchiseeId)
   const allFranchisees = session.isAdmin ? getAllFranchisees() : []
 
   const boats = franchisee?.boats || []
-  const selectedBoat = boats.find((b) => b.id === selectedBoatId)
 
   // Mock reservations data
   const mockReservations = [

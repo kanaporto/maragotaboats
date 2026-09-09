@@ -2,12 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // Optimizaciones para Cloudflare Pages
-  experimental: {
-    // Habilitar edge runtime para funciones
-    runtime: 'nodejs',
-  },
-
   // Configuración de imagen
   images: {
     unoptimized: true, // Cloudflare Pages no soporta Image Optimization

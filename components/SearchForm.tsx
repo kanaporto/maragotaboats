@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { SearchParams } from '@/app/page'
-import { getCoordinatesFromPostalCode, getCoordinatesFromCity } from '@/lib/fishingZones'
+import { getCoordinatesFromPostalCode } from '@/lib/fishingZones'
 
 const SPANISH_PROVINCES = [
   'Álava', 'Albacete', 'Alicante', 'Almería', 'Asturias', 'Ávila',
@@ -24,7 +24,6 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
   const [searchType, setSearchType] = useState<'province' | 'nearme' | 'postal'>('province')
   const [province, setProvince] = useState('')
   const [postalCode, setPostalCode] = useState('')
-  const [city, setCity] = useState('')
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [loading, setLoading] = useState(false)
@@ -78,29 +77,6 @@ export default function SearchForm({ onSearch }: SearchFormProps) {
       }
     } catch (err) {
       setError('Error al buscar por código postal.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const handleCitySearch = async () => {
-    setLoading(true)
-    setError('')
-
-    try {
-      const coords = await getCoordinatesFromCity(city)
-      if (coords) {
-        onSearch({
-          nearMe: true,
-          userLocation: coords,
-          date,
-          time,
-        })
-      } else {
-        setError('Población no encontrada. Intenta con otra.')
-      }
-    } catch (err) {
-      setError('Error al buscar por población.')
     } finally {
       setLoading(false)
     }

@@ -32,7 +32,7 @@ export default function ReservationModal({
     phone: '',
     confirmEmail: '',
   })
-  const [paymentMethod, setPaymentMethod] = useState<'applepay' | 'bizum' | 'googlepay' | null>(null)
+  const [, setPaymentMethod] = useState<'applepay' | 'bizum' | 'googlepay' | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -110,7 +110,6 @@ export default function ReservationModal({
 
   const reservationFee = 15
   const franchiseeFee = 45
-  const totalPrice = formData.numPeople * (reservationFee + franchiseeFee)
 
   if (!isOpen) return null
 

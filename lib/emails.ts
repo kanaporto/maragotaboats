@@ -125,7 +125,7 @@ export async function sendPasswordResetEmail(email: string, resetLink: string) {
 }
 
 // HTML templates para emails (en desarrollo solo logramos)
-function generateReservationEmailHTML(data: ReservationEmailData): string {
+export function generateReservationEmailHTML(data: ReservationEmailData): string {
   return `
     <h1>¡Reserva confirmada!</h1>
     <p>Hola ${data.customerName},</p>
