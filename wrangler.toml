@@ -1,27 +1,2 @@
 name = "maragota-boats"
-type = "javascript"
-account_id = "YOUR_ACCOUNT_ID"
-workers_dev = true
-route = "example.com/*"
-zone_id = "YOUR_ZONE_ID"
-
-[build]
-command = "npm run build"
-cwd = "./"
-watch_paths = ["src/**/*.ts"]
-
-[build.upload]
-format = "modules"
-main = "./server.js"
-
-[env.production]
-name = "maragota-boats-prod"
-routes = [
-  { pattern = "maragota.example.com", zone_name = "example.com" }
-]
-
-[env.staging]
-name = "maragota-boats-staging"
-routes = [
-  { pattern = "staging-maragota.example.com", zone_name = "example.com" }
-]
+pages_build_output_dir = ".next"
