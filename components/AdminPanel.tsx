@@ -793,7 +793,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
 
       {/* Franchisee details modal */}
       {selectedFranchisee && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto p-6">
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-xl font-bold text-maragota-black">{selectedFranchisee.name}</h3>
@@ -859,7 +859,7 @@ export default function AdminPanel({ onLogout }: AdminPanelProps) {
 
       {/* Lead negotiation modal */}
       {selectedLead && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
             <div className="flex justify-between items-start mb-4">
               <div>

@@ -33,11 +33,19 @@ export default function AvailabilityList({ searchParams }: AvailabilityListProps
   const [selectedBoat, setSelectedBoat] = useState<BoatWithFranchisee | null>(null)
   const [showReservationModal, setShowReservationModal] = useState(false)
 
-  // Get boats from dummy data based on search params
-  const getAvailableBoats = (): BoatWithFranchisee[] => {
+  // Get boats from dummy data based on search params. Si la provincia
+  // buscada no tiene franquicia, nunca dejamos al cliente sin opciones:
+  // caemos a mostrar todas las franquicias disponibles con un aviso.
+  const getAvailableBoats = (): { boats: BoatWithFranchisee[]; isFallback: boolean } => {
     let franchisees = searchParams.province
       ? searchFranchisees(searchParams.province)
       : getAllFranchisees()
+
+    let isFallback = false
+    if (franchisees.length === 0 && searchParams.province) {
+      franchisees = getAllFranchisees()
+      isFallback = true
+    }
 
     const boats: BoatWithFranchisee[] = []
 
@@ -79,10 +87,10 @@ export default function AvailabilityList({ searchParams }: AvailabilityListProps
       boats.sort((a, b) => (a.distance || 999) - (b.distance || 999))
     }
 
-    return boats
+    return { boats, isFallback }
   }
 
-  const boats = getAvailableBoats()
+  const { boats, isFallback } = getAvailableBoats()
 
   const handleReserve = (boat: BoatWithFranchisee) => {
     setSelectedBoat(boat)
@@ -111,6 +119,11 @@ export default function AvailabilityList({ searchParams }: AvailabilityListProps
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6">
+          {isFallback && (
+            <div className="bg-blue-50 border-l-4 border-blue-400 text-blue-900 text-sm p-4 rounded">
+              {t.availability.fallbackNotice(searchParams.province || '')}
+            </div>
+          )}
           {boats.map((boat) => (
             <div key={boat.id} className="card">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

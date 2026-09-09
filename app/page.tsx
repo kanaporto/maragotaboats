@@ -4,6 +4,7 @@ import SearchForm from '@/components/SearchForm'
 import AvailabilityList from '@/components/AvailabilityList'
 import FeaturedFranchises from '@/components/FeaturedFranchises'
 import WhyChooseUs from '@/components/WhyChooseUs'
+import Faq from '@/components/Faq'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { PENDING_RESERVATION_KEY } from '@/components/StripePaymentForm'
@@ -146,6 +147,8 @@ export default function Home() {
               </div>
             </div>
           </section>
+
+          <Faq />
         </>
       )}
     </div>

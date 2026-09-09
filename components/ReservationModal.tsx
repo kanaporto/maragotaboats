@@ -1,11 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { SearchParams } from '@/app/page'
 import StripePaymentForm from './StripePaymentForm'
 import { useLocale } from '@/lib/i18n/context'
+import { COUNTRY_CODES } from '@/lib/countryCodes'
 
 const STRIPE_CONFIGURED = Boolean(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+const SITE_URL = 'https://maragota-boats.pages.dev'
 
 interface Boat {
   id: string
@@ -13,6 +15,7 @@ interface Boat {
   location: string
   franchisee: string
   availableSeats: number
+  totalSeats: number
 }
 
 interface ReservationModalProps {
@@ -20,6 +23,14 @@ interface ReservationModalProps {
   searchParams: SearchParams
   isOpen: boolean
   onClose: () => void
+}
+
+function pad(n: number) {
+  return String(n).padStart(2, '0')
+}
+
+function toICSDateTime(d: Date) {
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`
 }
 
 export default function ReservationModal({
@@ -30,22 +41,91 @@ export default function ReservationModal({
 }: ReservationModalProps) {
   const { t } = useLocale()
   const [step, setStep] = useState<'people' | 'details' | 'payment' | 'confirmation'>('people')
+  const [bookingType, setBookingType] = useState<'shared' | 'private'>('shared')
   const [formData, setFormData] = useState({
     numPeople: 1,
     fullName: '',
     email: '',
     phone: '',
+    countryDial: '+34',
     confirmEmail: '',
   })
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [, setPaymentMethod] = useState<'applepay' | 'bizum' | 'googlepay' | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const modalRef = useRef<HTMLDivElement>(null)
+
+  const reservationFee = 15
+  const franchiseeFee = 45
+  const maxPeople = bookingType === 'private' ? boat.totalSeats : boat.availableSeats
+  const billedPeople = bookingType === 'private' ? boat.totalSeats : formData.numPeople
+  const draftKey = `maragota_draft_${boat.id}`
+
+  // Restaura el borrador si el cliente recargó la página a mitad de reservar.
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(draftKey)
+      if (saved) {
+        const draft = JSON.parse(saved)
+        if (draft.formData) setFormData((prev) => ({ ...prev, ...draft.formData }))
+        if (draft.bookingType) setBookingType(draft.bookingType)
+      }
+    } catch {
+      // Ignorar si sessionStorage no está disponible o el borrador es inválido.
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (step === 'confirmation') {
+      try {
+        sessionStorage.removeItem(draftKey)
+      } catch {}
+      return
+    }
+    try {
+      sessionStorage.setItem(draftKey, JSON.stringify({ formData, bookingType }))
+    } catch {}
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData, bookingType, step])
+
+  // Escape cierra el modal; Tab queda atrapado dentro mientras está abierto.
+  useEffect(() => {
+    if (!isOpen) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+      if (e.key === 'Tab' && modalRef.current) {
+        const focusable = modalRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+        if (focusable.length === 0) return
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown)
+    modalRef.current?.focus()
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isOpen, onClose])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
-      [name]: name === 'numPeople' ? Math.min(parseInt(value) || 1, boat.availableSeats) : value,
+      [name]: name === 'numPeople' ? Math.min(parseInt(value) || 1, maxPeople) : value,
     }))
   }
 
@@ -71,8 +151,13 @@ export default function ReservationModal({
       setError(t.reservationModal.errorEmailMismatch)
       return
     }
-    if (!formData.phone.trim() || formData.phone.length < 9) {
+    const digitsOnly = formData.phone.replace(/\D/g, '')
+    if (!formData.phone.trim() || digitsOnly.length < 7) {
       setError(t.reservationModal.errorPhoneInvalid)
+      return
+    }
+    if (!acceptedTerms) {
+      setError(t.reservationModal.errorTermsRequired)
       return
     }
 
@@ -87,11 +172,11 @@ export default function ReservationModal({
         to: formData.email,
         customerName: formData.fullName,
         boatName: boat.name,
-        numPeople: formData.numPeople,
+        numPeople: billedPeople,
         date: searchParams.date,
         time: searchParams.time,
-        reservationFeeTotal: formData.numPeople * reservationFee,
-        franchiseeFeeTotal: formData.numPeople * franchiseeFee,
+        reservationFeeTotal: billedPeople * reservationFee,
+        franchiseeFeeTotal: billedPeople * franchiseeFee,
       }),
     }).catch(() => {
       // Best-effort: el pago ya se confirmó, no bloqueamos al cliente si
@@ -126,14 +211,53 @@ export default function ReservationModal({
     setError(message)
   }
 
-  const reservationFee = 15
-  const franchiseeFee = 45
+  const handleAddToCalendar = () => {
+    if (!searchParams.date) return
+    const [y, m, d] = searchParams.date.split('-').map(Number)
+    const [hh, mm] = (searchParams.time || '08:00').split(':').map(Number)
+    const start = new Date(y, m - 1, d, hh, mm)
+    const end = new Date(start.getTime() + 3 * 60 * 60 * 1000)
+
+    const ics = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Maragota Boats//ES',
+      'BEGIN:VEVENT',
+      `UID:${boat.id}-${Date.now()}@maragotaboats.com`,
+      `DTSTAMP:${toICSDateTime(new Date())}Z`,
+      `DTSTART:${toICSDateTime(start)}`,
+      `DTEND:${toICSDateTime(end)}`,
+      `SUMMARY:Salida de pesca - ${boat.name}`,
+      `LOCATION:${boat.location}`,
+      `DESCRIPTION:Reserva confirmada con Maragota Boats.`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n')
+
+    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'maragota-boats-reserva.ics'
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const shareWhatsAppHref = `https://api.whatsapp.com/send?text=${encodeURIComponent(
+    `${t.reservationModal.shareWhatsAppMessage} ${SITE_URL}`
+  )}`
 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
+      <div
+        ref={modalRef}
+        tabIndex={-1}
+        className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto outline-none"
+      >
         {/* Header */}
         <div className="bg-maragota-black text-white p-6">
           <div className="flex justify-between items-start">
@@ -164,9 +288,33 @@ export default function ReservationModal({
             <form onSubmit={handlePeopleSubmit}>
               <h3 className="text-lg font-bold text-maragota-black mb-6">{t.reservationModal.peopleTitle}</h3>
 
+              {/* Compartido / Privado */}
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                <button
+                  type="button"
+                  onClick={() => setBookingType('shared')}
+                  className={`text-left p-3 rounded-lg border-2 transition-colors ${
+                    bookingType === 'shared' ? 'border-maragota-orange bg-orange-50' : 'border-maragota-light-gray'
+                  }`}
+                >
+                  <p className="font-semibold text-sm">{t.reservationModal.sharedLabel}</p>
+                  <p className="text-xs text-gray-600 mt-1">{t.reservationModal.sharedDesc}</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setBookingType('private')}
+                  className={`text-left p-3 rounded-lg border-2 transition-colors ${
+                    bookingType === 'private' ? 'border-maragota-orange bg-orange-50' : 'border-maragota-light-gray'
+                  }`}
+                >
+                  <p className="font-semibold text-sm">{t.reservationModal.privateLabel}</p>
+                  <p className="text-xs text-gray-600 mt-1">{t.reservationModal.privateDesc}</p>
+                </button>
+              </div>
+
               <div className="mb-8">
                 <label className="block text-sm font-semibold text-maragota-black mb-4">
-                  {t.reservationModal.peopleLabel(boat.availableSeats)}
+                  {t.reservationModal.peopleLabel(maxPeople)}
                 </label>
                 <select
                   name="numPeople"
@@ -174,7 +322,7 @@ export default function ReservationModal({
                   onChange={handleInputChange}
                   className="input-field text-lg py-4"
                 >
-                  {Array.from({ length: boat.availableSeats }).map((_, i) => (
+                  {Array.from({ length: maxPeople }).map((_, i) => (
                     <option key={i + 1} value={i + 1}>
                       {t.reservationModal.personOption(i + 1)}
                     </option>
@@ -184,11 +332,15 @@ export default function ReservationModal({
 
               {/* Price preview */}
               <div className="bg-maragota-light-gray p-4 rounded-lg mb-6">
-                <div className="text-sm text-gray-600 mb-4">{t.reservationModal.priceForPeople(formData.numPeople)}</div>
-                <div className="text-3xl font-bold text-maragota-orange">{formData.numPeople * 60}€</div>
+                <div className="text-sm text-gray-600 mb-4">
+                  {bookingType === 'private'
+                    ? t.reservationModal.privatePriceNote(billedPeople * 60)
+                    : t.reservationModal.priceForPeople(formData.numPeople)}
+                </div>
+                <div className="text-3xl font-bold text-maragota-orange">{billedPeople * 60}€</div>
                 <div className="text-xs text-gray-500 mt-2">
-                  • {t.reservationModal.reserveNowLine(formData.numPeople * reservationFee)}<br/>
-                  • {t.reservationModal.payAtDestinationLine(formData.numPeople * franchiseeFee)}
+                  • {t.reservationModal.reserveNowLine(billedPeople * reservationFee)}<br/>
+                  • {t.reservationModal.payAtDestinationLine(billedPeople * franchiseeFee)}
                 </div>
               </div>
 
@@ -251,14 +403,28 @@ export default function ReservationModal({
                   <label className="block text-sm font-semibold text-maragota-black mb-2">
                     {t.reservationModal.phoneLabel}
                   </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    placeholder="+34 6XX XXX XXX"
-                    className="input-field"
-                  />
+                  <div className="flex gap-2">
+                    <select
+                      name="countryDial"
+                      value={formData.countryDial}
+                      onChange={handleInputChange}
+                      className="input-field !w-32 shrink-0 px-2"
+                    >
+                      {COUNTRY_CODES.map((c) => (
+                        <option key={c.code} value={c.dial}>
+                          {c.flag} {c.dial}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      placeholder={t.reservationModal.phonePlaceholder}
+                      className="input-field flex-1 min-w-0"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -269,23 +435,35 @@ export default function ReservationModal({
               )}
 
               {/* Price summary */}
-              <div className="bg-maragota-light-gray p-4 rounded-lg mb-6">
+              <div className="bg-maragota-light-gray p-4 rounded-lg mb-4">
                 <div className="flex justify-between mb-2">
-                  <span>{t.reservationModal.reservationLine(formData.numPeople, reservationFee)}</span>
-                  <span className="font-semibold">{formData.numPeople * reservationFee}€</span>
+                  <span>{t.reservationModal.reservationLine(billedPeople, reservationFee)}</span>
+                  <span className="font-semibold">{billedPeople * reservationFee}€</span>
                 </div>
                 <div className="flex justify-between text-sm text-gray-600">
                   <span>{t.availability.franchiseeLater}</span>
-                  <span>{formData.numPeople * franchiseeFee}€</span>
+                  <span>{billedPeople * franchiseeFee}€</span>
                 </div>
               </div>
 
-              <p className="text-xs text-gray-500 mb-6">
-                {t.reservationModal.noShowDisclaimer}{' '}
-                <a href="/legal/terminos" target="_blank" rel="noopener noreferrer" className="text-maragota-orange hover:underline">
-                  {t.reservationModal.termsLink}
-                </a>.
+              <p className="text-xs text-gray-500 mb-4">
+                {t.reservationModal.paymentIconsHint}: 🍎 {t.reservationModal.applePay} · 🔵 {t.reservationModal.googlePay} · 📱 {t.reservationModal.bizum} · 💳 {t.reservationModal.cardLabel}
               </p>
+
+              <label className="flex items-start gap-2 text-xs text-gray-500 mb-6">
+                <input
+                  type="checkbox"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-0.5 w-4 h-4 shrink-0"
+                />
+                <span>
+                  {t.reservationModal.termsCheckboxPrefix}{' '}
+                  <a href="/legal/terminos" target="_blank" rel="noopener noreferrer" className="text-maragota-orange hover:underline">
+                    {t.reservationModal.termsLink}
+                  </a>{' '}({t.reservationModal.noShowDisclaimer.toLowerCase()})
+                </span>
+              </label>
 
               <div className="flex gap-3">
                 <button
@@ -307,7 +485,7 @@ export default function ReservationModal({
             <div>
               <h3 className="text-lg font-bold text-maragota-black mb-4">{t.reservationModal.paymentTitle}</h3>
               <p className="text-gray-600 mb-6">
-                {t.reservationModal.selectPaymentMethod(formData.numPeople * reservationFee)}
+                {t.reservationModal.selectPaymentMethod(billedPeople * reservationFee)}
               </p>
 
               {error && (
@@ -319,10 +497,10 @@ export default function ReservationModal({
               {STRIPE_CONFIGURED ? (
                 <div className="mb-6">
                   <StripePaymentForm
-                    amountEuros={formData.numPeople * reservationFee}
+                    amountEuros={billedPeople * reservationFee}
                     email={formData.email}
                     boatName={boat.name}
-                    numPeople={formData.numPeople}
+                    numPeople={billedPeople}
                     fullName={formData.fullName}
                     onSuccess={handleStripeSuccess}
                     onError={handleStripeError}
@@ -392,11 +570,11 @@ export default function ReservationModal({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">{t.reservationModal.peopleLabelShort}</span>
-                    <span className="font-semibold">{formData.numPeople}</span>
+                    <span className="font-semibold">{billedPeople}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">{t.reservationModal.paidTodayLabel}</span>
-                    <span className="font-semibold text-maragota-orange">{formData.numPeople * reservationFee}€</span>
+                    <span className="font-semibold text-maragota-orange">{billedPeople * reservationFee}€</span>
                   </div>
                 </div>
               </div>
@@ -406,9 +584,34 @@ export default function ReservationModal({
                 <ul className="text-blue-800 space-y-1">
                   <li>{t.reservationModal.nextStepsCheckEmail}</li>
                   <li>{t.reservationModal.nextStepsContact}</li>
-                  <li>{t.reservationModal.nextStepsPay(formData.numPeople * franchiseeFee)}</li>
+                  <li>{t.reservationModal.nextStepsPay(billedPeople * franchiseeFee)}</li>
                   <li>{t.reservationModal.nextStepsEnjoy}</li>
                 </ul>
+              </div>
+
+              <div className="bg-green-50 border border-green-200 p-4 rounded-lg mb-6 text-left text-sm">
+                <p className="font-semibold text-green-900 mb-2">{t.reservationModal.whatToBringTitle}</p>
+                <ul className="text-green-800 space-y-1">
+                  {t.reservationModal.whatToBringItems.map((item) => (
+                    <li key={item}>• {item}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex gap-3 mb-3">
+                {searchParams.date && (
+                  <button onClick={handleAddToCalendar} className="btn-secondary flex-1 text-sm">
+                    {t.reservationModal.addToCalendarButton}
+                  </button>
+                )}
+                <a
+                  href={shareWhatsAppHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-secondary flex-1 text-sm text-center"
+                >
+                  {t.reservationModal.shareWhatsAppButton}
+                </a>
               </div>
 
               <button onClick={onClose} className="btn-primary w-full">

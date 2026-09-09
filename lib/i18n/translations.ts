@@ -119,6 +119,7 @@ export interface Translations {
     perPerson: string
     reserveButton: string
     noAvailabilityButton: string
+    fallbackNotice: (province: string) => string
   }
   reservationModal: {
     completeIn3Steps: string
@@ -129,16 +130,26 @@ export interface Translations {
     reserveNowLine: (amount: number) => string
     payAtDestinationLine: (amount: number) => string
     continueButton: string
+    sharedLabel: string
+    sharedDesc: string
+    privateLabel: string
+    privateDesc: string
+    privatePriceNote: (total: number) => string
     detailsTitle: string
     fullNameLabel: string
     emailLabel: string
     emailHint: string
     confirmEmailLabel: string
     phoneLabel: string
+    phonePlaceholder: string
     reservationLine: (n: number, fee: number) => string
     payAtDestination: (amount: number) => string
     noShowDisclaimer: string
     termsLink: string
+    termsCheckboxPrefix: string
+    errorTermsRequired: string
+    paymentIconsHint: string
+    cardLabel: string
     backButton: string
     continueToPayment: string
     errorFullNameRequired: string
@@ -165,6 +176,15 @@ export interface Translations {
     nextStepsPay: (amount: number) => string
     nextStepsEnjoy: string
     backHomeButton: string
+    addToCalendarButton: string
+    shareWhatsAppButton: string
+    shareWhatsAppMessage: string
+    whatToBringTitle: string
+    whatToBringItems: string[]
+  }
+  faq: {
+    title: string
+    items: { question: string; answer: string }[]
   }
 }
 
@@ -308,6 +328,7 @@ export const es: Translations = {
     perPerson: 'Por persona',
     reserveButton: 'Reservar ahora',
     noAvailabilityButton: 'Sin disponibilidad',
+    fallbackNotice: (province) => `Todavía no tenemos franquicia en ${province}. Te mostramos las salidas disponibles más cercanas.`,
   },
   reservationModal: {
     completeIn3Steps: 'Completa tu reserva en 3 pasos',
@@ -318,22 +339,32 @@ export const es: Translations = {
     reserveNowLine: (amount) => `Reserva ahora: ${amount}€`,
     payAtDestinationLine: (amount) => `Paga en destino: ${amount}€`,
     continueButton: 'Continuar',
+    sharedLabel: '🤝 Compartido',
+    sharedDesc: 'Compartes el barco con otros pescadores. Pagas solo por tu grupo.',
+    privateLabel: '🔒 Privado',
+    privateDesc: 'El barco entero para vosotros solos. Nadie más se une a la salida.',
+    privatePriceNote: (total) => `Precio fijo del barco completo: ${total}€, vengáis los que vengáis`,
     detailsTitle: 'Tus datos personales',
     fullNameLabel: 'Nombre completo *',
     emailLabel: 'Email *',
     emailHint: 'Recibirás la confirmación en este email',
     confirmEmailLabel: 'Confirmar email *',
     phoneLabel: 'Teléfono *',
+    phonePlaceholder: '6XX XXX XXX',
     reservationLine: (n, fee) => `Reserva (${n} x ${fee}€):`,
     payAtDestination: (amount) => `${amount}€`,
     noShowDisclaimer: 'Si no te presentas a la salida, la reserva no se reembolsa. Consulta las',
     termsLink: 'condiciones de reserva',
+    termsCheckboxPrefix: 'He leído y acepto las',
+    errorTermsRequired: 'Debes aceptar las condiciones de reserva para continuar',
+    paymentIconsHint: 'Métodos de pago aceptados',
+    cardLabel: 'Tarjeta',
     backButton: 'Atrás',
     continueToPayment: 'Continuar al pago',
     errorFullNameRequired: 'El nombre completo es obligatorio',
     errorEmailInvalid: 'Por favor ingresa un email válido',
     errorEmailMismatch: 'Los emails no coinciden',
-    errorPhoneInvalid: 'Por favor ingresa un teléfono válido',
+    errorPhoneInvalid: 'Por favor ingresa un teléfono válido (mínimo 7 dígitos)',
     errorPaymentGeneric: 'Error procesando el pago. Intenta de nuevo.',
     paymentTitle: 'Método de pago',
     selectPaymentMethod: (amount) => `Selecciona cómo quieres pagar ${amount}€`,
@@ -354,6 +385,46 @@ export const es: Translations = {
     nextStepsPay: (amount) => `• Paga ${amount}€ al llegar (efectivo o tarjeta)`,
     nextStepsEnjoy: '• ¡A disfrutar de la pesca!',
     backHomeButton: 'Volver al inicio',
+    addToCalendarButton: '📅 Añadir al calendario',
+    shareWhatsAppButton: '💬 Compartir por WhatsApp',
+    shareWhatsAppMessage: '¡He reservado una salida de pesca con Maragota Boats! 🎣 Reserva la tuya:',
+    whatToBringTitle: '🎒 Qué llevar el día de la salida',
+    whatToBringItems: [
+      'Protector solar y gorra',
+      'Ropa de abrigo o impermeable',
+      'Calzado antideslizante',
+      'Algo para el mareo si eres propenso',
+      'Cámara para las fotos',
+    ],
+  },
+  faq: {
+    title: 'Preguntas frecuentes',
+    items: [
+      {
+        question: '¿Puedo cancelar mi reserva?',
+        answer: 'La seña de 15€ no es reembolsable, salvo que el franquiciado decida lo contrario. Consulta las condiciones de reserva completas.',
+      },
+      {
+        question: '¿Hay edad mínima?',
+        answer: 'Depende de cada franquicia y salida. Se indica en el momento de la reserva; para menores debe ir acompañados de un adulto.',
+      },
+      {
+        question: '¿Qué pasa si hace mal tiempo?',
+        answer: 'El franquiciado puede cambiar la fecha u hora de la salida por seguridad. Te avisará directamente si es necesario.',
+      },
+      {
+        question: '¿Puedo reservar el barco solo para mi grupo?',
+        answer: 'Sí, elige la opción "Privado" al reservar: pagas un precio fijo por el barco completo y nadie más se une a la salida.',
+      },
+      {
+        question: '¿Qué incluye el precio?',
+        answer: 'Equipo de pesca, cebo, seguro, licencia de pesca colectiva, chaleco salvavidas, monitor guía y combustible.',
+      },
+      {
+        question: '¿Cómo pago?',
+        answer: 'La seña se paga online al reservar (tarjeta, Bizum, Apple Pay o Google Pay). El resto se paga en destino, en efectivo o con tarjeta.',
+      },
+    ],
   },
 }
 
@@ -497,6 +568,7 @@ export const en: Translations = {
     perPerson: 'Per person',
     reserveButton: 'Book now',
     noAvailabilityButton: 'Not available',
+    fallbackNotice: (province) => `We don't have a franchise in ${province} yet. Here are the closest available trips.`,
   },
   reservationModal: {
     completeIn3Steps: 'Complete your booking in 3 steps',
@@ -507,22 +579,32 @@ export const en: Translations = {
     reserveNowLine: (amount) => `Deposit now: €${amount}`,
     payAtDestinationLine: (amount) => `Pay on-site: €${amount}`,
     continueButton: 'Continue',
+    sharedLabel: '🤝 Shared',
+    sharedDesc: "You share the boat with other anglers. You only pay for your group.",
+    privateLabel: '🔒 Private',
+    privateDesc: 'The whole boat just for you. No one else joins the trip.',
+    privatePriceNote: (total) => `Fixed price for the whole boat: €${total}, however many of you come`,
     detailsTitle: 'Your details',
     fullNameLabel: 'Full name *',
     emailLabel: 'Email *',
     emailHint: "We'll send your confirmation to this email",
     confirmEmailLabel: 'Confirm email *',
     phoneLabel: 'Phone *',
+    phonePlaceholder: '7XXX XXXXXX',
     reservationLine: (n, fee) => `Deposit (${n} x €${fee}):`,
     payAtDestination: (amount) => `€${amount}`,
     noShowDisclaimer: "If you don't show up, the deposit isn't refunded. See the",
     termsLink: 'booking terms',
+    termsCheckboxPrefix: 'I have read and accept the',
+    errorTermsRequired: 'You must accept the booking terms to continue',
+    paymentIconsHint: 'Accepted payment methods',
+    cardLabel: 'Card',
     backButton: 'Back',
     continueToPayment: 'Continue to payment',
     errorFullNameRequired: 'Full name is required',
     errorEmailInvalid: 'Please enter a valid email',
     errorEmailMismatch: "Emails don't match",
-    errorPhoneInvalid: 'Please enter a valid phone number',
+    errorPhoneInvalid: 'Please enter a valid phone number (at least 7 digits)',
     errorPaymentGeneric: 'Error processing the payment. Please try again.',
     paymentTitle: 'Payment method',
     selectPaymentMethod: (amount) => `Choose how you want to pay €${amount}`,
@@ -543,6 +625,46 @@ export const en: Translations = {
     nextStepsPay: (amount) => `• Pay €${amount} on arrival (cash or card)`,
     nextStepsEnjoy: '• Enjoy your fishing trip!',
     backHomeButton: 'Back to home',
+    addToCalendarButton: '📅 Add to calendar',
+    shareWhatsAppButton: '💬 Share on WhatsApp',
+    shareWhatsAppMessage: 'I just booked a fishing trip with Maragota Boats! 🎣 Book yours:',
+    whatToBringTitle: '🎒 What to bring on the day',
+    whatToBringItems: [
+      'Sunscreen and a cap',
+      'Warm or waterproof clothing',
+      'Non-slip footwear',
+      'Motion sickness remedy if you are prone to it',
+      'A camera for the photos',
+    ],
+  },
+  faq: {
+    title: 'Frequently asked questions',
+    items: [
+      {
+        question: 'Can I cancel my booking?',
+        answer: 'The €15 deposit is non-refundable, unless the franchisee decides otherwise. See the full booking terms.',
+      },
+      {
+        question: 'Is there a minimum age?',
+        answer: 'It depends on the franchise and trip. It is shown when booking; minors must be accompanied by an adult.',
+      },
+      {
+        question: 'What happens if the weather is bad?',
+        answer: 'The franchisee may reschedule the trip for safety reasons. They will contact you directly if needed.',
+      },
+      {
+        question: 'Can I book the boat just for my group?',
+        answer: 'Yes, choose the "Private" option when booking: you pay a fixed price for the whole boat and no one else joins the trip.',
+      },
+      {
+        question: "What's included in the price?",
+        answer: 'Fishing gear, bait, insurance, collective fishing licence, life jacket, guide skipper and fuel.',
+      },
+      {
+        question: 'How do I pay?',
+        answer: 'The deposit is paid online when booking (card, Bizum, Apple Pay or Google Pay). The rest is paid on-site, in cash or by card.',
+      },
+    ],
   },
 }
 
@@ -686,6 +808,7 @@ export const fr: Translations = {
     perPerson: 'Par personne',
     reserveButton: 'Réserver',
     noAvailabilityButton: 'Indisponible',
+    fallbackNotice: (province) => `Nous n'avons pas encore de franchise à ${province}. Voici les sorties disponibles les plus proches.`,
   },
   reservationModal: {
     completeIn3Steps: 'Complétez votre réservation en 3 étapes',
@@ -696,22 +819,32 @@ export const fr: Translations = {
     reserveNowLine: (amount) => `Acompte maintenant : ${amount}€`,
     payAtDestinationLine: (amount) => `À payer sur place : ${amount}€`,
     continueButton: 'Continuer',
+    sharedLabel: '🤝 Partagé',
+    sharedDesc: 'Vous partagez le bateau avec d\'autres pêcheurs. Vous ne payez que pour votre groupe.',
+    privateLabel: '🔒 Privé',
+    privateDesc: 'Le bateau entier rien que pour vous. Personne d\'autre ne participe à la sortie.',
+    privatePriceNote: (total) => `Prix fixe pour le bateau entier : ${total}€, quel que soit le nombre de participants`,
     detailsTitle: 'Vos informations personnelles',
     fullNameLabel: 'Nom complet *',
     emailLabel: 'Email *',
     emailHint: 'Vous recevrez la confirmation à cet email',
     confirmEmailLabel: "Confirmer l'email *",
     phoneLabel: 'Téléphone *',
+    phonePlaceholder: '6 XX XX XX XX',
     reservationLine: (n, fee) => `Acompte (${n} x ${fee}€) :`,
     payAtDestination: (amount) => `${amount}€`,
     noShowDisclaimer: "Si vous ne vous présentez pas, l'acompte n'est pas remboursé. Consultez les",
     termsLink: 'conditions de réservation',
+    termsCheckboxPrefix: "J'ai lu et j'accepte les",
+    errorTermsRequired: 'Vous devez accepter les conditions de réservation pour continuer',
+    paymentIconsHint: 'Moyens de paiement acceptés',
+    cardLabel: 'Carte',
     backButton: 'Retour',
     continueToPayment: 'Continuer vers le paiement',
     errorFullNameRequired: 'Le nom complet est obligatoire',
     errorEmailInvalid: 'Veuillez saisir un email valide',
     errorEmailMismatch: 'Les emails ne correspondent pas',
-    errorPhoneInvalid: 'Veuillez saisir un téléphone valide',
+    errorPhoneInvalid: 'Veuillez saisir un téléphone valide (7 chiffres minimum)',
     errorPaymentGeneric: 'Erreur lors du traitement du paiement. Veuillez réessayer.',
     paymentTitle: 'Méthode de paiement',
     selectPaymentMethod: (amount) => `Choisissez comment payer ${amount}€`,
@@ -732,6 +865,46 @@ export const fr: Translations = {
     nextStepsPay: (amount) => `• Payez ${amount}€ à votre arrivée (espèces ou carte)`,
     nextStepsEnjoy: '• Profitez de votre sortie pêche !',
     backHomeButton: "Retour à l'accueil",
+    addToCalendarButton: '📅 Ajouter au calendrier',
+    shareWhatsAppButton: '💬 Partager sur WhatsApp',
+    shareWhatsAppMessage: "Je viens de réserver une sortie de pêche avec Maragota Boats ! 🎣 Réservez la vôtre :",
+    whatToBringTitle: '🎒 Quoi apporter le jour J',
+    whatToBringItems: [
+      'Crème solaire et casquette',
+      'Vêtements chauds ou imperméables',
+      'Chaussures antidérapantes',
+      'Un remède contre le mal de mer si vous y êtes sujet',
+      'Un appareil photo pour les souvenirs',
+    ],
+  },
+  faq: {
+    title: 'Questions fréquentes',
+    items: [
+      {
+        question: 'Puis-je annuler ma réservation ?',
+        answer: "L'acompte de 15€ n'est pas remboursable, sauf décision contraire du franchisé. Consultez les conditions de réservation complètes.",
+      },
+      {
+        question: 'Y a-t-il un âge minimum ?',
+        answer: "Cela dépend de chaque franchise et sortie. C'est indiqué au moment de la réservation ; les mineurs doivent être accompagnés d'un adulte.",
+      },
+      {
+        question: "Que se passe-t-il s'il fait mauvais temps ?",
+        answer: 'Le franchisé peut changer la date ou l\'heure de la sortie pour des raisons de sécurité. Il vous préviendra directement si nécessaire.',
+      },
+      {
+        question: 'Puis-je réserver le bateau juste pour mon groupe ?',
+        answer: 'Oui, choisissez l\'option "Privé" lors de la réservation : vous payez un prix fixe pour le bateau entier et personne d\'autre ne participe à la sortie.',
+      },
+      {
+        question: 'Que comprend le prix ?',
+        answer: 'Matériel de pêche, appâts, assurance, licence de pêche collective, gilet de sauvetage, skipper guide et carburant.',
+      },
+      {
+        question: 'Comment puis-je payer ?',
+        answer: "L'acompte se paie en ligne lors de la réservation (carte, Bizum, Apple Pay ou Google Pay). Le reste se paie sur place, en espèces ou par carte.",
+      },
+    ],
   },
 }
 
