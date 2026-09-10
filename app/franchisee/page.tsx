@@ -3,13 +3,7 @@
 import { useEffect, useState } from 'react'
 import FranchiseeDashboard from '@/components/FranchiseeDashboard'
 import FranchiseeLogin from '@/components/FranchiseeLogin'
-
-interface FranchiseeSession {
-  franchiseeId: string
-  companyName: string
-  email: string
-  isAdmin: boolean
-}
+import { FranchiseeSession } from '@/lib/dummyData'
 
 export default function FranchiseePanel() {
   const [session, setSession] = useState<FranchiseeSession | null>(null)
@@ -20,7 +14,10 @@ export default function FranchiseePanel() {
     const savedSession = localStorage.getItem('franchisee_session')
     if (savedSession) {
       try {
-        setSession(JSON.parse(savedSession))
+        const parsed = JSON.parse(savedSession)
+        // Compatibilidad con sesiones guardadas antes de introducir el rol operario
+        if (!parsed.role) parsed.role = 'owner'
+        setSession(parsed)
       } catch (err) {
         localStorage.removeItem('franchisee_session')
       }

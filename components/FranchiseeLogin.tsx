@@ -1,14 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { AUTHORIZED_FRANCHISEES } from '@/lib/dummyData'
-
-interface FranchiseeSession {
-  franchiseeId: string
-  companyName: string
-  email: string
-  isAdmin: boolean
-}
+import { AUTHORIZED_FRANCHISEES, FranchiseeSession } from '@/lib/dummyData'
 
 interface FranchiseeLoginProps {
   onLogin: (session: FranchiseeSession) => void
@@ -49,6 +42,7 @@ export default function FranchiseeLogin({ onLogin }: FranchiseeLoginProps) {
         companyName: isAdmin ? 'Administrador Maragota' : franchisee?.companyName || '',
         email,
         isAdmin,
+        role: auth.role,
       }
 
       onLogin(session)
@@ -134,6 +128,10 @@ export default function FranchiseeLogin({ onLogin }: FranchiseeLoginProps) {
               <div className="bg-gray-50 p-3 rounded">
                 <p className="font-mono">marin@maragota.com</p>
                 <p className="font-mono text-gray-500">marin2024</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded border border-blue-300">
+                <p className="font-mono text-blue-600 font-bold">operario.bueu@maragota.com (OPERARIO)</p>
+                <p className="font-mono text-gray-500">operario2024</p>
               </div>
               <div className="bg-gray-50 p-3 rounded border border-yellow-300">
                 <p className="font-mono text-maragota-orange font-bold">geno@maragota.com (ADMIN)</p>

@@ -156,26 +156,52 @@ export const DUMMY_FRANCHISEES: Record<string, Franchisee> = {
 }
 
 // Franquiciados autenticados con contraseña hardcodeada
+// role 'owner' = acceso completo a su franquicia; 'operario' = solo gestión operativa (reservas/barcos)
 export const AUTHORIZED_FRANCHISEES = {
   'finisterre@maragota.com': {
     password: 'finisterre2024',
     franchiseeId: 'finisterre',
+    role: 'owner' as const,
+  },
+  'operario.finisterre@maragota.com': {
+    password: 'operario2024',
+    franchiseeId: 'finisterre',
+    role: 'operario' as const,
   },
   'bueu@maragota.com': {
     password: 'bueu2024',
     franchiseeId: 'bueu',
+    role: 'owner' as const,
+  },
+  'operario.bueu@maragota.com': {
+    password: 'operario2024',
+    franchiseeId: 'bueu',
+    role: 'operario' as const,
   },
   'portonovo@maragota.com': {
     password: 'portonovo2024',
     franchiseeId: 'portonovo',
+    role: 'owner' as const,
+  },
+  'operario.portonovo@maragota.com': {
+    password: 'operario2024',
+    franchiseeId: 'portonovo',
+    role: 'operario' as const,
   },
   'marin@maragota.com': {
     password: 'marin2024',
     franchiseeId: 'marin',
+    role: 'owner' as const,
+  },
+  'operario.marin@maragota.com': {
+    password: 'operario2024',
+    franchiseeId: 'marin',
+    role: 'operario' as const,
   },
   'geno@maragota.com': {
     password: 'geno2024',
     franchiseeId: 'admin', // Admin tiene acceso a todo
+    role: 'owner' as const,
   },
 }
 
@@ -205,9 +231,12 @@ export const searchFranchisees = (
 }
 
 // Tipo para sesión de franquiciado
+export type FranchiseeRole = 'owner' | 'operario'
+
 export interface FranchiseeSession {
   franchiseeId: string
   companyName: string
   email: string
   isAdmin: boolean
+  role: FranchiseeRole
 }

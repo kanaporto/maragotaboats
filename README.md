@@ -100,6 +100,19 @@ Contraseña: geno2024
 Rol: Administrador - Acceso a todas las franquicias
 ```
 
+### Usuarios Operario (por franquicia)
+
+Cada franquicia puede tener, además de su login de propietario, uno o más
+logins de **operario**: un nivel de acceso inferior pensado para empleados
+que solo necesitan gestión operativa del día a día (reservas y barcos), sin
+ver ingresos, analytics ni configuración del negocio.
+
+```
+Email: operario.<franquicia>@maragota.com   (ej: operario.bueu@maragota.com)
+Contraseña: operario2024
+Rol: Operario - Solo Barcos y Reservas
+```
+
 ## 🎨 Acceso Rápido
 
 **Página de Cliente:** http://localhost:3000

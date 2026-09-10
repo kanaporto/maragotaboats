@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getFranchiseeById, getAllFranchisees } from '@/lib/dummyData'
+import { getFranchiseeById, getAllFranchisees, FranchiseeSession } from '@/lib/dummyData'
 import { whatsappLink } from '@/lib/whatsapp'
 import AdminPanel from './AdminPanel'
 
@@ -30,13 +30,6 @@ const REVENUE_HISTORY = [
   { month: 'Sep', revenue: 720 },
 ]
 
-interface FranchiseeSession {
-  franchiseeId: string
-  companyName: string
-  email: string
-  isAdmin: boolean
-}
-
 interface FranchiseeDashboardProps {
   session: FranchiseeSession
   onLogout: () => void
@@ -53,7 +46,11 @@ export default function FranchiseeDashboard({
     return <AdminPanel onLogout={onLogout} />
   }
 
-  const [activeTab, setActiveTab] = useState<TabType>('overview')
+  // El operario solo tiene acceso a gestión operativa pura (reservas y barcos),
+  // nunca a ingresos, analytics ni configuración.
+  const isOperario = session.role === 'operario'
+
+  const [activeTab, setActiveTab] = useState<TabType>(isOperario ? 'reservations' : 'overview')
   const [, setSelectedBoatId] = useState<string | null>(null)
   const [, setShowEditModal] = useState(false)
 
@@ -195,7 +192,14 @@ export default function FranchiseeDashboard({
           <div className="flex items-center gap-4">
             <span className="text-3xl">🔑</span>
             <div>
-              <h1 className="text-2xl font-bold">{session.companyName}</h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold">{session.companyName}</h1>
+                {isOperario && (
+                  <span className="text-xs font-bold bg-blue-600 text-white px-2 py-0.5 rounded-full">
+                    OPERARIO
+                  </span>
+                )}
+              </div>
               <p className="text-gray-400 text-sm">{session.email}</p>
             </div>
           </div>
@@ -212,16 +216,18 @@ export default function FranchiseeDashboard({
       <div className="bg-white shadow">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex gap-8 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`py-4 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'overview'
-                  ? 'text-maragota-orange border-maragota-orange'
-                  : 'text-gray-600 border-transparent hover:text-maragota-orange'
-              }`}
-            >
-              📊 Resumen
-            </button>
+            {!isOperario && (
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`py-4 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === 'overview'
+                    ? 'text-maragota-orange border-maragota-orange'
+                    : 'text-gray-600 border-transparent hover:text-maragota-orange'
+                }`}
+              >
+                📊 Resumen
+              </button>
+            )}
             <button
               onClick={() => setActiveTab('boats')}
               className={`py-4 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
@@ -254,26 +260,30 @@ export default function FranchiseeDashboard({
                 🏢 Franquicias
               </button>
             )}
-            <button
-              onClick={() => setActiveTab('analytics')}
-              className={`py-4 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'analytics'
-                  ? 'text-maragota-orange border-maragota-orange'
-                  : 'text-gray-600 border-transparent hover:text-maragota-orange'
-              }`}
-            >
-              📈 Analytics
-            </button>
-            <button
-              onClick={() => setActiveTab('settings')}
-              className={`py-4 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
-                activeTab === 'settings'
-                  ? 'text-maragota-orange border-maragota-orange'
-                  : 'text-gray-600 border-transparent hover:text-maragota-orange'
-              }`}
-            >
-              ⚙️ Configuración
-            </button>
+            {!isOperario && (
+              <button
+                onClick={() => setActiveTab('analytics')}
+                className={`py-4 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === 'analytics'
+                    ? 'text-maragota-orange border-maragota-orange'
+                    : 'text-gray-600 border-transparent hover:text-maragota-orange'
+                }`}
+              >
+                📈 Analytics
+              </button>
+            )}
+            {!isOperario && (
+              <button
+                onClick={() => setActiveTab('settings')}
+                className={`py-4 px-4 font-semibold border-b-2 transition-colors whitespace-nowrap ${
+                  activeTab === 'settings'
+                    ? 'text-maragota-orange border-maragota-orange'
+                    : 'text-gray-600 border-transparent hover:text-maragota-orange'
+                }`}
+              >
+                ⚙️ Configuración
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -281,7 +291,7 @@ export default function FranchiseeDashboard({
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Overview Tab */}
-        {activeTab === 'overview' && (
+        {activeTab === 'overview' && !isOperario && (
           <div className="space-y-6">
             <h2 className="text-3xl font-bold text-maragota-black">Bienvenido, {session.companyName}</h2>
 
@@ -661,7 +671,7 @@ export default function FranchiseeDashboard({
         )}
 
         {/* Analytics Tab */}
-        {activeTab === 'analytics' && (
+        {activeTab === 'analytics' && !isOperario && (
           <div className="card">
             <h2 className="text-2xl font-bold text-maragota-black mb-6">📈 Analytics</h2>
             <div className="bg-maragota-light-gray p-8 rounded-lg text-center text-gray-600">
@@ -672,7 +682,7 @@ export default function FranchiseeDashboard({
         )}
 
         {/* Settings Tab */}
-        {activeTab === 'settings' && !session.isAdmin && (
+        {activeTab === 'settings' && !session.isAdmin && !isOperario && (
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-maragota-black">⚙️ Configuración</h2>
 
